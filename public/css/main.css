@@ -1,0 +1,15 @@
+@import "theme.css";
+@import "common.css";
+/*@import "form.css";*/
+@import "home.css";
+@import "auth/login.css";
+@import "auth/register.css";
+@import "toast.css";
+@import "not_found.css";
+@import "app/app.css";
+@import "app/documents.css";
+@import "app/projects.css";
+@import "app/create-project-modal.css";
+@import "app/reviews.css";
+@import "app/team.css";
+/* Base Styles */

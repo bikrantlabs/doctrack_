@@ -1,0 +1,353 @@
+/* ============================================
+   NOT-FOUND.CSS - 404 Page Styles
+   Uses theme.css variables
+   ============================================ */
+
+/* Main Container */
+.not-found {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-main);
+    position: relative;
+    overflow: hidden;
+    padding: var(--spacing-xl);
+}
+
+.not-found-container {
+    position: relative;
+    width: 100%;
+    max-width: 700px;
+    text-align: center;
+    z-index: 1;
+}
+
+/* ==================
+   Floating Background Documents
+   ================== */
+
+.not-found-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.floating-doc {
+    position: absolute;
+    color: var(--color-border);
+    opacity: 0.15;
+    animation: float 8s ease-in-out infinite;
+}
+
+.floating-doc-1 {
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+    transform: rotate(-15deg);
+}
+
+.floating-doc-2 {
+    top: 20%;
+    right: 15%;
+    animation-delay: -2s;
+    transform: rotate(10deg);
+}
+
+.floating-doc-3 {
+    bottom: 20%;
+    left: 20%;
+    animation-delay: -4s;
+    transform: rotate(-8deg);
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0) rotate(-15deg);
+    }
+    50% {
+        transform: translateY(-20px) rotate(-10deg);
+    }
+}
+
+.floating-doc-2 {
+    animation-name: float-alt;
+}
+
+@keyframes float-alt {
+    0%, 100% {
+        transform: translateY(0) rotate(10deg);
+    }
+    50% {
+        transform: translateY(-25px) rotate(15deg);
+    }
+}
+
+.floating-doc-3 {
+    animation-name: float-slow;
+}
+
+@keyframes float-slow {
+    0%, 100% {
+        transform: translateY(0) rotate(-8deg);
+    }
+    50% {
+        transform: translateY(-15px) rotate(-5deg);
+    }
+}
+
+/* ==================
+   404 Code Display
+   ================== */
+
+.not-found-code {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.digit {
+    font-size: clamp(5rem, 15vw, 10rem);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    line-height: 1;
+    text-shadow: 0 0 60px var(--color-primary-glow);
+    background: linear-gradient(
+            180deg,
+            var(--color-text-primary) 0%,
+            var(--color-text-secondary) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.digit-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-primary);
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.digit-icon svg {
+    width: clamp(60px, 12vw, 120px);
+    height: clamp(60px, 12vw, 120px);
+    filter: drop-shadow(0 0 20px var(--color-primary-glow));
+}
+
+@keyframes pulse-glow {
+    0%, 100% {
+        filter: drop-shadow(0 0 20px var(--color-primary-glow));
+        transform: scale(1);
+    }
+    50% {
+        filter: drop-shadow(0 0 40px var(--color-primary));
+        transform: scale(1.05);
+    }
+}
+
+/* ==================
+   Content
+   ================== */
+
+.not-found-content {
+    position: relative;
+    z-index: 2;
+}
+
+.not-found-title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-md);
+    letter-spacing: var(--letter-spacing-tight);
+}
+
+.not-found-description {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    line-height: var(--line-height-relaxed);
+    max-width: 500px;
+    margin: 0 auto var(--spacing-xl);
+}
+
+/* ==================
+   Search Suggestion
+   ================== */
+
+.not-found-suggestion {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    background: var(--color-bg-elevated);
+    border: var(--border-width-thin) solid var(--color-border);
+    border-radius: var(--radius-full);
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    margin-bottom: var(--spacing-2xl);
+}
+
+.not-found-suggestion svg {
+    flex-shrink: 0;
+    opacity: 0.6;
+}
+
+/* ==================
+   Action Buttons
+   ================== */
+
+.not-found-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+.not-found-actions .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+    border: none;
+}
+
+.not-found-actions .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-bg-dark);
+    box-shadow: var(--shadow-glow);
+}
+
+.not-found-actions .btn-primary:hover {
+    background: var(--color-primary-hover);
+    box-shadow: var(--shadow-glow-lg);
+    transform: translateY(-2px);
+}
+
+.not-found-actions .btn-secondary {
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    border: var(--border-width-thin) solid var(--color-border);
+}
+
+.not-found-actions .btn-secondary:hover {
+    background: var(--color-bg-hover);
+    border-color: var(--color-border-light);
+    transform: translateY(-2px);
+}
+
+/* ==================
+   Footer Info
+   ================== */
+
+.not-found-footer {
+    position: absolute;
+    bottom: -80px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-disabled);
+    font-family: var(--font-family-mono);
+}
+
+.separator {
+    opacity: 0.5;
+}
+
+/* ==================
+   Responsive Styles
+   ================== */
+
+@media (max-width: 768px) {
+    .not-found {
+        padding: var(--spacing-lg);
+    }
+
+    .not-found-code {
+        gap: var(--spacing-sm);
+    }
+
+    .not-found-title {
+        font-size: var(--font-size-2xl);
+    }
+
+    .not-found-description {
+        font-size: var(--font-size-base);
+    }
+
+    .not-found-suggestion {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--spacing-md);
+        border-radius: var(--radius-lg);
+    }
+
+    .not-found-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .not-found-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .not-found-footer {
+        flex-direction: column;
+        gap: var(--spacing-xs);
+        bottom: -100px;
+    }
+
+    .separator {
+        display: none;
+    }
+
+    .floating-doc {
+        display: none;
+    }
+}
+
+/* ==================
+   Decorative Gradient Orbs
+   ================== */
+
+.not-found::before,
+.not-found::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.not-found::before {
+    width: 400px;
+    height: 400px;
+    background: var(--color-primary);
+    top: -100px;
+    right: -100px;
+}
+
+.not-found::after {
+    width: 300px;
+    height: 300px;
+    background: var(--color-info);
+    bottom: -50px;
+    left: -50px;
+}
+

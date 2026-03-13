@@ -1,0 +1,78 @@
+/* ==================
+   REGISTRATION FORM
+   ================== */
+.auth-layout-register {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.register-form .form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+
+/* Visual Panel - Registration Specific */
+.register-visual-features {
+    margin-top: var(--spacing-3xl);
+    text-align: left;
+}
+
+.register-feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.register-feature-item:last-child {
+    margin-bottom: 0;
+}
+
+.register-feature-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--color-primary-light);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
+}
+
+.register-feature-icon svg {
+    width: 20px;
+    height: 20px;
+    color: var(--color-primary);
+}
+
+.register-feature-content {
+    flex: 1;
+}
+
+.register-feature-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: 2px;
+}
+
+.register-feature-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+/* ==================
+   RESPONSIVE
+   ================== */
+
+@media (max-width: 480px) {
+    .form-name-row {
+        grid-template-columns: 1fr;
+    }
+
+    .signature-pad {
+        height: 120px;
+    }
+}

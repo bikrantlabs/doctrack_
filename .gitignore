@@ -1,0 +1,63 @@
+# Ignore editor and IDE files
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+*.komodoproject
+_ide_helper.php
+
+# Ignore OS-generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+._*
+
+# Ignore compiled and temporary files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.tmp
+*.patch
+*.swp
+*~
+
+# Ignore packaged files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Ignore log files and databases
+*.log
+*.sql
+*.sqlite
+
+# Ignore cache and build artifacts
+.cache/
+.libs/
+autom4te.cache/
+build/
+config.cache
+config.log
+config.status
+configure
+confdefs.h
+conftest*
+main/internal_functions.c
+main/internal_functions_cli.c
+libtool
+Makefile
+Makefile.fragments
+Makefile.objects
+libs/
+modules/
+
+
+.env

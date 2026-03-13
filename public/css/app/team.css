@@ -1,0 +1,289 @@
+/* ============================================
+   TEAM.CSS - Team Management Page Styles
+   ============================================ */
+
+/* Team Stats */
+.team-stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.team-stat-card {
+    background-color: var(--color-bg-card);
+    border: var(--border-width-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    text-align: center;
+    transition: all var(--transition-fast);
+}
+
+.team-stat-card:hover {
+    border-color: var(--color-border-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.team-stat-value {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    line-height: var(--line-height-tight);
+}
+
+.team-stat-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-top: var(--spacing-xs);
+}
+
+/* Team Grid */
+.team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+/* Team Member Card */
+.team-member-card {
+    background-color: var(--color-bg-card);
+    border: var(--border-width-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: all var(--transition-fast);
+}
+
+.team-member-card:hover {
+    border-color: var(--color-border-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.team-member-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: var(--spacing-lg);
+    padding-bottom: 0;
+}
+
+.team-member-avatar-lg {
+    width: 64px;
+    height: 64px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--color-primary), #4ade80);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-bg-dark);
+}
+
+.team-member-avatar-lg.avatar-blue {
+    background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+
+.team-member-avatar-lg.avatar-purple {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+}
+
+.team-member-avatar-lg.avatar-pending {
+    background: var(--color-bg-input);
+    color: var(--color-text-muted);
+}
+
+.team-member-avatar-lg.avatar-pending svg {
+    width: 28px;
+    height: 28px;
+}
+
+.team-member-menu {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+}
+
+.team-member-menu:hover {
+    background-color: var(--color-bg-hover);
+    color: var(--color-text-primary);
+}
+
+.team-member-menu svg {
+    width: 16px;
+    height: 16px;
+}
+
+.team-member-body {
+    padding: var(--spacing-lg);
+    text-align: center;
+}
+
+.team-member-name {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.team-member-email {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-md);
+}
+
+.team-member-role {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 12px;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-full);
+}
+
+.team-member-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: var(--border-width-thin) solid var(--color-border);
+    background-color: var(--color-bg-elevated);
+}
+
+.team-member-projects {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.team-member-projects svg {
+    width: 14px;
+    height: 14px;
+}
+
+.team-member-joined {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+/* Pending Member Card */
+.team-member-pending {
+    border-style: dashed;
+    opacity: 0.8;
+}
+
+.team-member-pending .team-member-name {
+    font-size: var(--font-size-sm);
+}
+
+.pending-text {
+    color: var(--color-warning);
+}
+
+/* Add Member Card */
+.team-member-add {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 260px;
+    border: 2px dashed var(--color-border);
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.team-member-add:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-primary-light);
+}
+
+.team-member-add-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.team-member-add-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-bg-input);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.team-member-add-icon svg {
+    width: 24px;
+    height: 24px;
+    color: var(--color-text-muted);
+    transition: color var(--transition-fast);
+}
+
+.team-member-add:hover .team-member-add-icon {
+    background-color: var(--color-primary);
+}
+
+.team-member-add:hover .team-member-add-icon svg {
+    color: var(--color-bg-dark);
+}
+
+.team-member-add-text {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    transition: color var(--transition-fast);
+}
+
+.team-member-add:hover .team-member-add-text {
+    color: var(--color-primary);
+}
+
+/* ==================
+   RESPONSIVE STYLES
+   ================== */
+@media (max-width: 1280px) {
+    .team-stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .team-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .team-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .team-member-footer {
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .team-stats {
+        grid-template-columns: 1fr;
+    }
+}
