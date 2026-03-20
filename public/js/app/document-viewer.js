@@ -154,6 +154,15 @@
                     }, 300);
                 }
 
+                root.addEventListener('doctrack:viewer:goto-page', function (event) {
+                    var requestedPage = event && event.detail ? Number(event.detail.page) : 0;
+                    if (!Number.isInteger(requestedPage) || requestedPage <= 0) {
+                        return;
+                    }
+
+                    goToPage(requestedPage);
+                });
+
                 // Render all pages initially
                 var chain = Promise.resolve();
                 for (var i = 1; i <= totalPages; i++) {

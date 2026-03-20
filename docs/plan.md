@@ -125,17 +125,42 @@ File Storage Strategy:
 
 #### Phase 3.3 - Review Threads
 
-- [ ] Reviewers can open review threads on a document, each thread representing a distinct issue or concern.
-- [ ] Threads belong to the document, not a specific version, and persist across all versions.
-- [ ] All threads are visible on the document detail page regardless of which version is being viewed.
+Pre-Note: The headless prototype is under `docs/project_id_document_id page.png`. The "Review Threads" section on the
+right side of the document detail page should list all threads related to the document, regardless of version. Each
+thread should indicate which version(s) it is open on and allow filtering by version.
+
+- [x] Add "Create new thread" button on the document detail page in "Review Threads" section, visible to reviewers and
+  owners.
+- [x] Reviewer and Owner can open review threads on a document, each thread representing a distinct issue or concern.
+- [x] Threads belong to the document, not a specific version, and persist across all versions.
+- [x] All threads are visible on the document detail page regardless of which version is being viewed.
 -
 
 #### Phase 3.4 - Review Comments
 
-- [ ] Reviewers can post comments inside a thread, tied to the specific version they are currently viewing and a page
+Pre-Note: The headless prototype is under `docs/document_id review_comments section.png`. When clicked on each thread,
+the "Review Threads" section should be changed to show the comments inside the thread. Each comment should indicate
+which version it was made on, and when viewing a specific version, comments from other versions should be visually
+de-emphasized but still accessible. Each comment should indicate page number, author, timestamp, content and version as
+in the image. Everyone can add comments in threads, again as the prototype there should be "Mark as resolved" button
+only for reviewers and owners. For other users, the button should be hidden. For adding new comment, there should be a
+text area for content and a option to choose page number. Commenter can either choose "Current Page", or specify page
+number.
+
+- [ ] Anyone can post comments inside a thread, tied to the specific version they are currently viewing and a page
   number.
 - [ ] When viewing a thread, comments should be grouped or labeled by which version they were made on.
 - [ ] Only users with reviewer, editor, or owner role in the project can comment.
+- [ ] There should be "Back" button as shown in prototype to go back to thread list from comment view.
+- [ ] Each comment should indicate page number, author, timestamp, content and version as in the image.
+- [ ] When viewing a specific version, comments from other versions should be visually de-emphasized but still
+  accessible.
+- [ ] There should be a text area for adding new comment, and an option to choose page number (either "Current Page" or
+  specify page number).
+- [ ] Only reviewers and owners can see the "Mark as resolved" button for each thread, and can mark a thread as
+  resolved. Other users should not see this button.
+- [ ] Marking a thread as resolved should record the user and timestamp of resolution, and visually indicate the
+  thread's resolved status in the thread list and comment view.
 
 #### Phase 3.5 - New Version Upload
 

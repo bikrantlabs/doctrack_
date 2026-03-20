@@ -12,6 +12,9 @@ final class DocumentService
 {
     private const MAX_UPLOAD_SIZE_BYTES = 26214400; // 25MB
     private const ALLOWED_UPLOAD_ROLES = ['owner', 'editor'];
+    private const ALLOWED_THREAD_CREATOR_ROLES = ['owner', 'reviewer'];
+    private const ALLOWED_COMMENTER_ROLES = ['owner', 'editor', 'reviewer'];
+    private const ALLOWED_RESOLVER_ROLES = ['owner', 'reviewer'];
 
     public function __construct(
         private readonly DocumentRepository $documents,
@@ -112,7 +115,7 @@ final class DocumentService
     }
 
     /**
-     * @return array{document:array{id:int,project_id:int,title:string,current_version_id:int,created_at:string,project_role:string}, selectedVersion:array{id:int,document_id:int,version_number:int,file_path:string,file_type:string,uploaded_by:int,uploaded_by_name:string|null,change_summary:string|null,status:string|null,is_locked:int,created_at:string}, versions:array<int, array{id:int,document_id:int,version_number:int,file_path:string,file_type:string,uploaded_by:int,uploaded_by_name:string|null,change_summary:string|null,status:string|null,is_locked:int,created_at:string}>}|null
+     * @return array{document:array{id:int,project_id:int,title:string,current_version_id:int,created_at:string,project_role:string}, selectedVersion:array{id:int,document_id:int,version_number:int,file_path:string,file_type:string,uploaded_by:int,uploaded_by_name:string|null,change_summary:string|null,status:string|null,is_locked:int,created_at:string}, versions:array<int, array{id:int,document_id:int,version_number:int,file_path:string,file_type:string,uploaded_by:int,uploaded_by_name:string|null,change_summary:string|null,status:string|null,is_locked:int,created_at:string}>, threads:array<int, array{id:int,title:string,created_by:int,created_by_name:string|null,created_at:string,status:string,selected_version_status:string,open_version_numbers:array<int,int>,comments:array<int, array{id:int,review_thread_id:int,document_version_id:int,version_number:int,reviewer_id:int,reviewer_name:string|null,page_number:int,comment:string,created_at:string}>}>}|null
      */
     public function fetchDocumentDetailForUser(int $projectId, int $documentId, int $userId, ?int $requestedVersion): ?array
     {
@@ -155,11 +158,196 @@ final class DocumentService
             $selectedVersion = $versions[0];
         }
 
+        $threads = $this->documents->getReviewThreadsForUser($projectId, $documentId, $userId);
+        $comments = $this->documents->getReviewCommentsForDocumentForUser($projectId, $documentId, $userId);
+        $selectedVersionStatusMap = $this->documents->getThreadStatusMapForVersionForUser(
+            $projectId,
+            $documentId,
+            $userId,
+            (int) $selectedVersion['id']
+        );
+
+        $commentsByThreadId = [];
+        foreach ($comments as $comment) {
+            $threadId = (int) $comment['review_thread_id'];
+            if (!isset($commentsByThreadId[$threadId])) {
+                $commentsByThreadId[$threadId] = [];
+            }
+
+            $commentsByThreadId[$threadId][] = $comment;
+        }
+
+        foreach ($threads as $index => $thread) {
+            $threadId = (int) $thread['id'];
+            $threads[$index]['comments'] = $commentsByThreadId[$threadId] ?? [];
+            $threads[$index]['selected_version_status'] = $selectedVersionStatusMap[$threadId] ?? 'open';
+        }
+
         return [
             'document' => $document,
             'selectedVersion' => $selectedVersion,
             'versions' => $versions,
+            'threads' => $threads,
         ];
+    }
+
+    /** @return array{ok:bool,message:string} */
+    public function createReviewThreadForUser(
+        int $projectId,
+        int $documentId,
+        int $actorUserId,
+        string $title,
+        string $comment,
+        int $pageNumber,
+        int $versionId
+    ): array {
+        if ($projectId <= 0 || $documentId <= 0 || $actorUserId <= 0 || $versionId <= 0) {
+            return ['ok' => false, 'message' => 'Invalid request.'];
+        }
+
+        $role = $this->projects->getUserRoleInProject($projectId, $actorUserId);
+        if (!in_array((string) $role, self::ALLOWED_THREAD_CREATOR_ROLES, true)) {
+            return ['ok' => false, 'message' => 'Only owner or reviewer can create review threads.'];
+        }
+
+        $document = $this->documents->getDocumentDetailForUser($projectId, $documentId, $actorUserId);
+        if ($document === null) {
+            return ['ok' => false, 'message' => 'Document not found.'];
+        }
+
+        $normalizedTitle = trim($title);
+        if ($normalizedTitle === '') {
+            return ['ok' => false, 'message' => 'Thread title is required.'];
+        }
+
+        if (mb_strlen($normalizedTitle) > 255) {
+            return ['ok' => false, 'message' => 'Thread title cannot exceed 255 characters.'];
+        }
+
+        $normalizedComment = trim($comment);
+        if ($normalizedComment === '') {
+            return ['ok' => false, 'message' => 'First comment is required.'];
+        }
+
+        if ($pageNumber <= 0) {
+            return ['ok' => false, 'message' => 'Page number must be greater than zero.'];
+        }
+
+        $version = $this->documents->getDocumentVersionByIdForUser($versionId, $actorUserId);
+        if ($version === null || (int) $version['document_id'] !== $documentId) {
+            return ['ok' => false, 'message' => 'Selected version was not found.'];
+        }
+
+        $threadId = $this->generateId();
+        $commentId = $this->generateId();
+
+        try {
+            $this->documents->createReviewThreadWithInitialComment(
+                $threadId,
+                $commentId,
+                $documentId,
+                $actorUserId,
+                $normalizedTitle,
+                $normalizedComment,
+                $pageNumber,
+                (int) $version['id']
+            );
+        } catch (Throwable $exception) {
+            return ['ok' => false, 'message' => 'Could not create review thread.'];
+        }
+
+        return ['ok' => true, 'message' => 'Review thread created.'];
+    }
+
+    /** @return array{ok:bool,message:string} */
+    public function addReviewCommentForUser(
+        int $projectId,
+        int $documentId,
+        int $threadId,
+        int $actorUserId,
+        string $comment,
+        int $pageNumber,
+        int $versionId
+    ): array {
+        if ($projectId <= 0 || $documentId <= 0 || $threadId <= 0 || $actorUserId <= 0 || $versionId <= 0) {
+            return ['ok' => false, 'message' => 'Invalid request.'];
+        }
+
+        $role = $this->projects->getUserRoleInProject($projectId, $actorUserId);
+        if (!in_array((string) $role, self::ALLOWED_COMMENTER_ROLES, true)) {
+            return ['ok' => false, 'message' => 'Only owner, editor, or reviewer can comment.'];
+        }
+
+        $thread = $this->documents->getReviewThreadForUser($projectId, $documentId, $threadId, $actorUserId);
+        if ($thread === null) {
+            return ['ok' => false, 'message' => 'Review thread not found.'];
+        }
+
+        $version = $this->documents->getDocumentVersionByIdForUser($versionId, $actorUserId);
+        if ($version === null || (int) $version['document_id'] !== $documentId) {
+            return ['ok' => false, 'message' => 'Selected version was not found.'];
+        }
+
+        $normalizedComment = trim($comment);
+        if ($normalizedComment === '') {
+            return ['ok' => false, 'message' => 'Comment is required.'];
+        }
+
+        if ($pageNumber <= 0) {
+            return ['ok' => false, 'message' => 'Page number must be greater than zero.'];
+        }
+
+        try {
+            $this->documents->createReviewComment(
+                $this->generateId(),
+                $threadId,
+                $versionId,
+                $actorUserId,
+                $pageNumber,
+                $normalizedComment
+            );
+            $this->documents->upsertReviewStatusOpen($threadId, $versionId);
+        } catch (Throwable $exception) {
+            return ['ok' => false, 'message' => 'Could not add comment.'];
+        }
+
+        return ['ok' => true, 'message' => 'Comment added.'];
+    }
+
+    /** @return array{ok:bool,message:string} */
+    public function resolveReviewThreadForUser(
+        int $projectId,
+        int $documentId,
+        int $threadId,
+        int $actorUserId,
+        int $versionId
+    ): array {
+        if ($projectId <= 0 || $documentId <= 0 || $threadId <= 0 || $actorUserId <= 0 || $versionId <= 0) {
+            return ['ok' => false, 'message' => 'Invalid request.'];
+        }
+
+        $role = $this->projects->getUserRoleInProject($projectId, $actorUserId);
+        if (!in_array((string) $role, self::ALLOWED_RESOLVER_ROLES, true)) {
+            return ['ok' => false, 'message' => 'Only owner or reviewer can resolve threads.'];
+        }
+
+        $thread = $this->documents->getReviewThreadForUser($projectId, $documentId, $threadId, $actorUserId);
+        if ($thread === null) {
+            return ['ok' => false, 'message' => 'Review thread not found.'];
+        }
+
+        $version = $this->documents->getDocumentVersionByIdForUser($versionId, $actorUserId);
+        if ($version === null || (int) $version['document_id'] !== $documentId) {
+            return ['ok' => false, 'message' => 'Selected version was not found.'];
+        }
+
+        try {
+            $this->documents->resolveReviewThreadForVersion($threadId, $versionId, $actorUserId);
+        } catch (Throwable $exception) {
+            return ['ok' => false, 'message' => 'Could not resolve thread.'];
+        }
+
+        return ['ok' => true, 'message' => 'Thread marked as resolved.'];
     }
 
     /**

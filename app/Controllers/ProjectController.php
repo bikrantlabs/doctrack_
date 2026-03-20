@@ -162,7 +162,86 @@ final class ProjectController extends Controller
             'document' => $payload['document'],
             'selectedVersion' => $payload['selectedVersion'],
             'versions' => $payload['versions'],
+            'threads' => $payload['threads'],
         ], (string) $payload['document']['title']);
+    }
+
+    public function createReviewThread(string $projectId, string $documentId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $payload = $this->readPayload();
+        $title = trim((string) ($payload['title'] ?? ''));
+        $comment = trim((string) ($payload['comment'] ?? ''));
+        $pageNumber = (int) ($payload['page_number'] ?? 0);
+        $versionId = (int) ($payload['version_id'] ?? 0);
+
+        $result = $this->documentService->createReviewThreadForUser(
+            (int) $projectId,
+            (int) $documentId,
+            (int) $user['id'],
+            $title,
+            $comment,
+            $pageNumber,
+            $versionId
+        );
+
+        $statusCode = $result['ok'] ? 201 : 422;
+        $this->json($result, $statusCode);
+    }
+
+    public function addReviewComment(string $projectId, string $documentId, string $threadId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $payload = $this->readPayload();
+        $comment = trim((string) ($payload['comment'] ?? ''));
+        $pageNumber = (int) ($payload['page_number'] ?? 0);
+        $versionId = (int) ($payload['version_id'] ?? 0);
+
+        $result = $this->documentService->addReviewCommentForUser(
+            (int) $projectId,
+            (int) $documentId,
+            (int) $threadId,
+            (int) $user['id'],
+            $comment,
+            $pageNumber,
+            $versionId
+        );
+
+        $statusCode = $result['ok'] ? 201 : 422;
+        $this->json($result, $statusCode);
+    }
+
+    public function resolveReviewThread(string $projectId, string $documentId, string $threadId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $payload = $this->readPayload();
+        $versionId = (int) ($payload['version_id'] ?? 0);
+
+        $result = $this->documentService->resolveReviewThreadForUser(
+            (int) $projectId,
+            (int) $documentId,
+            (int) $threadId,
+            (int) $user['id'],
+            $versionId
+        );
+
+        $statusCode = $result['ok'] ? 200 : 422;
+        $this->json($result, $statusCode);
     }
 
     public function streamDocumentVersion(string $versionId): void
