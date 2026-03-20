@@ -6,17 +6,21 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Repositories\DocumentRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\UserRepository;
+use App\Services\DocumentService;
 use App\Services\ProjectService;
 
 final class ProjectController extends Controller
 {
     private ProjectService $projectService;
+    private DocumentService $documentService;
 
     public function __construct()
     {
         $this->projectService = new ProjectService(new ProjectRepository(), new UserRepository());
+        $this->documentService = new DocumentService(new DocumentRepository(), new ProjectRepository());
     }
 
     public function searchUsers(): void
@@ -84,10 +88,192 @@ final class ProjectController extends Controller
             return;
         }
 
+        $members = $this->projectService->fetchProjectMembersForUser($id, (int) $user['id']);
+        $documents = $this->documentService->fetchProjectDocumentsForUser($id, (int) $user['id']);
+
         $this->render('app/projects/show', [
             'user' => $user,
             'project' => $project,
+            'members' => $members,
+            'documents' => $documents,
         ], (string) $project['title']);
+    }
+
+    public function uploadDocument(string $projectId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $projectIdInt = (int) $projectId;
+        $title = trim((string) ($_POST['title'] ?? ''));
+        $file = $_FILES['document_file'] ?? null;
+
+        if (!is_array($file)) {
+            $this->json(['ok' => false, 'message' => 'Please choose a file to upload.'], 422);
+            return;
+        }
+
+        $result = $this->documentService->uploadInitialDocument(
+            $projectIdInt,
+            (int) $user['id'],
+            $title,
+            $file
+        );
+
+        $statusCode = $result['ok'] ? 201 : 422;
+        $this->json($result, $statusCode);
+    }
+
+    public function showDocument(string $projectId, string $documentId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->flash('error', 'Please sign in to continue.');
+            $this->redirect('/login');
+        }
+
+        $projectIdInt = (int) $projectId;
+        $documentIdInt = (int) $documentId;
+        if ($projectIdInt <= 0 || $documentIdInt <= 0) {
+            http_response_code(404);
+            echo 'Page not found';
+            return;
+        }
+
+        $requestedVersion = isset($_GET['version']) ? (int) $_GET['version'] : null;
+        $payload = $this->documentService->fetchDocumentDetailForUser(
+            $projectIdInt,
+            $documentIdInt,
+            (int) $user['id'],
+            $requestedVersion
+        );
+
+        if ($payload === null) {
+            http_response_code(404);
+            echo 'Page not found';
+            return;
+        }
+
+        $this->render('app/documents/show', [
+            'user' => $user,
+            'document' => $payload['document'],
+            'selectedVersion' => $payload['selectedVersion'],
+            'versions' => $payload['versions'],
+        ], (string) $payload['document']['title']);
+    }
+
+    public function streamDocumentVersion(string $versionId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            http_response_code(401);
+            echo 'Unauthorized';
+            return;
+        }
+
+        $versionIdInt = (int) $versionId;
+        $file = $this->documentService->getVersionFileForUser($versionIdInt, (int) $user['id']);
+
+        if ($file === null) {
+            http_response_code(404);
+            echo 'File not found';
+            return;
+        }
+
+        $contentType = $file['fileType'] === 'docx'
+            ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+            : 'application/pdf';
+
+        $disposition = (string) ($_GET['download'] ?? '') === '1' ? 'attachment' : 'inline';
+
+        header('Content-Type: ' . $contentType);
+        header('Content-Length: ' . (string) filesize($file['absolutePath']));
+        header('Content-Disposition: ' . $disposition . '; filename="' . $file['fileName'] . '"');
+        readfile($file['absolutePath']);
+        exit;
+    }
+
+    public function updateMemberRole(string $projectId, string $memberUserId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $projectIdInt = (int) $projectId;
+        $memberUserIdInt = (int) $memberUserId;
+        $payload = $this->readPayload();
+        $role = trim((string) ($payload['role'] ?? ''));
+
+        $result = $this->projectService->changeMemberRole(
+            $projectIdInt,
+            (int) $user['id'],
+            $memberUserIdInt,
+            $role
+        );
+
+        $statusCode = $result['ok'] ? 200 : 422;
+        $this->json($result, $statusCode);
+    }
+
+    public function removeMember(string $projectId, string $memberUserId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $result = $this->projectService->removeMemberFromProject(
+            (int) $projectId,
+            (int) $user['id'],
+            (int) $memberUserId
+        );
+
+        $statusCode = $result['ok'] ? 200 : 422;
+        $this->json($result, $statusCode);
+    }
+
+    public function getInvitations(): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $invitations = $this->projectService->fetchPendingInvitations((int) $user['id']);
+        $this->json(['ok' => true, 'invitations' => $invitations]);
+    }
+
+    public function acceptInvitation(string $invitationId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $result = $this->projectService->acceptInvitation((int) $user['id'], (int) $invitationId);
+        $statusCode = $result['ok'] ? 200 : 422;
+        $this->json($result, $statusCode);
+    }
+
+    public function declineInvitation(string $invitationId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $result = $this->projectService->declineInvitation((int) $user['id'], (int) $invitationId);
+        $statusCode = $result['ok'] ? 200 : 422;
+        $this->json($result, $statusCode);
     }
 
     /** @return array<string, mixed> */

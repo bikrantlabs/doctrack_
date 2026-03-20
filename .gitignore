@@ -36,7 +36,6 @@ ehthumbs.db
 
 # Ignore log files and databases
 *.log
-*.sql
 *.sqlite
 
 # Ignore cache and build artifacts
@@ -58,6 +57,8 @@ Makefile.fragments
 Makefile.objects
 libs/
 modules/
+
+storage/
 
 
 .env

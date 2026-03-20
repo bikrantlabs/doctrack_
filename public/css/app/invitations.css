@@ -1,0 +1,175 @@
+/* ============================================
+   INVITATIONS.CSS - Notifications & Invitations
+   ============================================ */
+
+/* Notifications Wrapper */
+.notifications-wrapper {
+    position: relative;
+}
+
+/* Notifications Trigger Button */
+.notifications-trigger {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: var(--color-error);
+    color: white;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+}
+
+/* Notifications Dropdown */
+.notifications-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--spacing-sm);
+    width: 380px;
+    max-height: 500px;
+    background-color: var(--color-bg-card);
+    border: var(--border-width-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    z-index: var(--z-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.95);
+    transition: all var(--transition-fast);
+    pointer-events: none;
+}
+
+.notifications-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Notifications List */
+.notifications-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* Invitation Item */
+.invitation-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: var(--border-width-thin) solid var(--color-border);
+    transition: background-color var(--transition-fast);
+}
+
+.invitation-item:last-child {
+    border-bottom: none;
+}
+
+.invitation-item:hover {
+    background-color: var(--color-bg-hover);
+}
+
+.invitation-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.invitation-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    flex-wrap: wrap;
+}
+
+.invitation-project {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.invitation-role {
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.invitation-from {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    margin: 0;
+}
+
+.invitation-from strong {
+    color: var(--color-text-primary);
+}
+
+.invitation-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+}
+
+.invitation-accept-btn,
+.invitation-decline-btn {
+    white-space: nowrap;
+}
+
+/* Notifications Empty State */
+.notifications-empty {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.notifications-empty p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .notifications-dropdown {
+        width: calc(100vw - var(--spacing-lg) * 2);
+        max-width: 380px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%) translateY(-8px) scale(0.95);
+    }
+
+    .notifications-dropdown.active {
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .invitation-item {
+        flex-direction: column;
+    }
+
+    .invitation-actions {
+        width: 100%;
+    }
+
+    .invitation-accept-btn,
+    .invitation-decline-btn {
+        flex: 1;
+    }
+}
+

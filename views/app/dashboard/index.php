@@ -1,6 +1,8 @@
 <?php
 $currentUrl = current_path();
 $activeScope = isset($activeScope) ? (string) $activeScope : 'all';
+$pendingInvitationCount = isset($pendingInvitationCount) ? (int) $pendingInvitationCount : 0;
+$pendingInvitations = isset($pendingInvitations) ? (array) $pendingInvitations : [];
 $scopeTabs = [
     'all' => 'All Projects',
     'my' => 'My Projects',
@@ -10,7 +12,7 @@ $scopeTabs = [
 $scopeSubtitle = [
     'all' => 'Manage and organize your document projects',
     'my' => 'Projects you own or can edit',
-    'shared' => 'Projects shared with you as reviewer or viewer',
+    'shared' => 'Projects shared with you where you are not the owner',
 ];
 ?>
 <!-- Projects Page - Main Container -->
@@ -47,13 +49,18 @@ $scopeSubtitle = [
                     </svg>
                     <input type="text" placeholder="Search projects..." class="search-input" aria-label="Search projects">
                 </div>
-                <button class="header-icon-btn" aria-label="Notifications">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                    </svg>
-                    <span class="notification-dot"></span>
-                </button>
+                <div class="notifications-wrapper">
+                    <button class="header-icon-btn notifications-trigger" aria-label="Notifications" data-notifications-trigger="1">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <?php if ($pendingInvitationCount > 0): ?>
+                            <span class="notification-badge"><?= min($pendingInvitationCount, 9) ?><?= $pendingInvitationCount > 9 ? '+' : '' ?></span>
+                        <?php endif; ?>
+                    </button>
+                    <?php require BASE_PATH . '/views/app/components/notifications-dropdown.php'; ?>
+                </div>
             </div>
         </header>
 
@@ -162,4 +169,5 @@ $scopeSubtitle = [
 
 <?php require BASE_PATH . '/views/app/modals/create-new-project.php'; ?>
 <script src="<?= e(url('/js/app/projects.js')) ?>" defer></script>
+<script src="<?= e(url('/js/app/invitations.js')) ?>" defer></script>
 

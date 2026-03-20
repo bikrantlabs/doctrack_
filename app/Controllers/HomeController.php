@@ -44,11 +44,15 @@ final class HomeController extends Controller
         $projectService = new ProjectService(new ProjectRepository(), new UserRepository());
         $activeScope = $projectService->normalizeScope($rawScope);
         $projects = $projectService->fetchProjectsByScope((int) $user['id'], $activeScope);
+        $pendingInvitations = $projectService->fetchPendingInvitations((int) $user['id']);
+        $pendingInvitationCount = $projectService->getPendingInvitationCount((int) $user['id']);
 
         $this->render('app/dashboard/index', [
             'user' => $user,
             'activeScope' => $activeScope,
             'projects' => $projects,
+            'pendingInvitations' => $pendingInvitations,
+            'pendingInvitationCount' => $pendingInvitationCount,
         ], 'Projects');
     }
 }

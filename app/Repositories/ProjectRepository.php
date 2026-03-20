@@ -128,7 +128,8 @@ final class ProjectRepository
         if ($scope === 'my') {
             $roleCondition = " AND up.role IN ('owner', 'editor')";
         } elseif ($scope === 'shared') {
-            $roleCondition = " AND up.role IN ('reviewer', 'viewer')";
+            // Shared means any project you are part of but do not own.
+            $roleCondition = " AND up.role IN ('editor', 'reviewer', 'viewer')";
         }
 
         $pdo = Database::connection();
@@ -199,5 +200,94 @@ final class ProjectRepository
         $project = $statement->fetch(\PDO::FETCH_ASSOC);
 
         return $project ?: null;
+    }
+
+    /**
+     * @return array<int, array{id:int, fullname:string, email:string, role:string, joined_at:string}>
+     */
+    public function getProjectMembersForUser(int $projectId, int $requestingUserId): array
+    {
+        $pdo = Database::connection();
+        $statement = $pdo->prepare(
+            'SELECT up.user_id AS id,
+                    u.fullname,
+                    u.email,
+                    up.role,
+                    up.created_at AS joined_at
+             FROM user_projects up
+             INNER JOIN users u ON u.id = up.user_id
+             WHERE up.project_id = :project_id
+               AND EXISTS (
+                    SELECT 1
+                    FROM user_projects access_up
+                    WHERE access_up.project_id = up.project_id
+                      AND access_up.user_id = :requesting_user_id
+               )
+             ORDER BY FIELD(up.role, \'owner\', \'editor\', \'reviewer\', \'viewer\'), u.fullname ASC'
+        );
+
+        $statement->execute([
+            'project_id' => $projectId,
+            'requesting_user_id' => $requestingUserId,
+        ]);
+
+        return $statement->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getUserRoleInProject(int $projectId, int $userId): ?string
+    {
+        $pdo = Database::connection();
+        $statement = $pdo->prepare(
+            'SELECT role
+             FROM user_projects
+             WHERE project_id = :project_id AND user_id = :user_id
+             LIMIT 1'
+        );
+
+        $statement->execute([
+            'project_id' => $projectId,
+            'user_id' => $userId,
+        ]);
+
+        $role = $statement->fetchColumn();
+        return is_string($role) ? $role : null;
+    }
+
+    public function updateMemberRole(int $projectId, int $memberUserId, string $role): bool
+    {
+        $pdo = Database::connection();
+        $statement = $pdo->prepare(
+            'UPDATE user_projects
+             SET role = :role
+             WHERE project_id = :project_id
+               AND user_id = :member_user_id
+               AND role <> \'owner\''
+        );
+
+        $statement->execute([
+            'project_id' => $projectId,
+            'member_user_id' => $memberUserId,
+            'role' => $role,
+        ]);
+
+        return $statement->rowCount() > 0;
+    }
+
+    public function removeMember(int $projectId, int $memberUserId): bool
+    {
+        $pdo = Database::connection();
+        $statement = $pdo->prepare(
+            'DELETE FROM user_projects
+             WHERE project_id = :project_id
+               AND user_id = :member_user_id
+               AND role <> \'owner\''
+        );
+
+        $statement->execute([
+            'project_id' => $projectId,
+            'member_user_id' => $memberUserId,
+        ]);
+
+        return $statement->rowCount() > 0;
     }
 }

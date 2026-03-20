@@ -59,26 +59,110 @@
 
 ### Phase 2.3 - Project Members Management
 
-- [ ] Fetch and display project member list with roles from `user_projects`.
-- [ ] Add owner-only member role change actions.
-- [ ] Add owner-only member removal functionality.
-- [ ] Implement member list UI with role badges and action buttons.
+- [x] Fetch and display project member list with roles from `user_projects`.
+- [x] Add owner-only member role change actions.
+- [x] Add owner-only member removal functionality.
+- [x] Implement member list UI with role badges and action buttons.
 
 ### Phase 2.4 - Project Invitations & Notifications
 
-- [ ] Implement invite by email workflow with `project_invitations` table.
-- [ ] Track invitation states (pending, accepted, declined).
-- [ ] Display notification regarding incoming invitations on dashboard.
-- [ ] Add accept/decline invitation actions and flows.
+- [x] Implement invite by email workflow with `project_invitations` table.
+- [x] Track invitation states (pending, accepted, declined).
+- [x] Display notification regarding incoming invitations on dashboard.
+- [x] The notification should be displayed under the `header-icon-btn` in `dashboard/index.php` as a dropdown.
+- [x] Don't implement the `notification` table and related logic for now, just show pending invitations in the dropdown.
+- [x] The notification dropdown should reside in its own file `views/app/components/notifications-dropdown.php` and be
+  accompanied by JavaScript.
+- [x] Add accept/decline invitation actions and flows.
+
+Got it. Here's the rewritten Phase 3:
+
+---
+
+### Phase 3 - Documents, Versioning, and Review Workflow(`/app/projects/{projectId}/` page)
+
+#### Phase 3.1 - Document Upload
+
+Pre-Note: The headless page prototype for `/app/project/{projectId}` page is kept under `docs/project_id page.png`.
+Again, this design is only the prototype of how page should look like, align with our current sidebar/and app theme to
+implement the page design. The `app/projects/show.php` is responsible for specific project page. Extract the
+`project-members-card` into separate component.
+
+- [x] Add document upload button within `/app/project/{projectId}`.
+- [x] A modal should allow uploading a file (PDF/DOCX) along with a title edit input.
+- [x] Avoid using external library for dropzone; dropzone should be implemented natively with html, css and js.
+- [x] Submitting the modal creates the document and version 1 automatically.
+- [x] Uploaded files should be stored securely outside the public directory.
+- [x] Create separate files for different components of the document upload feature.
+
+File Storage Strategy:
+> Create a directory outside your public/ folder, something like storage/documents/, and save files there. Since it's
+> outside webroot, files aren't directly accessible via URL, which is the right behavior — you want every file download
+> to
+> go through PHP so you can auth-check it first.
+> When saving a file, don't use the original filename. Generate something like {documentId}_{versionNumber}_
+> {timestamp}.pdf or just a UUID, and store the original filename separately in the database if you want to show it to
+> the
+> user. This avoids collisions and path traversal issues.
+> For serving the file back, you make a route like /app/documents/file/{versionId}, PHP reads the file from
+> storage/documents/, sets the right Content-Type header (application/pdf or
+> application/vnd.openxmlformats-officedocument.wordprocessingml.document), and streams it with readfile(). The browser
+> either renders it inline or downloads it depending on whether you set Content-Disposition: inline or attachment.
+
+#### Phase 3.2 - Document Listing and Detail Page
+
+- [ ] List all documents within a project in `/app/project/{projectId}`, each showing its current version status and
+  file type(already done).
+- [x] Clicking a document opens its detail page `/app/project/{projectId}/{documentId}`.
+- [x] Left side of the page should show include document preview/viewer.
+- [x] Use any open-source JavaScript library of your choice for PDF/DOCX preview.
+- [x] Build document viewer interface in such way that later if new document type comes in, we can easily use any viewer
+  for that file type.
+- [x] Don't use sidebar for this page, left side->document viewer, right side->document details, versions, threads,
+  comments, and review actions.
+- [x] The detail page shows the current version by default, with a way to navigate to previous versions.
+- [x] Files should be servable/downloadable from the detail page after an auth check.
+
+#### Phase 3.3 - Review Threads
+
+- [ ] Reviewers can open review threads on a document, each thread representing a distinct issue or concern.
+- [ ] Threads belong to the document, not a specific version, and persist across all versions.
+- [ ] All threads are visible on the document detail page regardless of which version is being viewed.
 -
 
-### Phase 3 - Documents and Versioning
+#### Phase 3.4 - Review Comments
 
-- [ ] Upload PDF/DOCX documents within a project.
-- [ ] Create first and subsequent `document_versions` correctly.
-- [ ] Keep `documents.current_version_id` in sync.
-- [ ] Show document list per project and document detail pages.
-- [ ] Implement version history and current version metadata UI.
+- [ ] Reviewers can post comments inside a thread, tied to the specific version they are currently viewing and a page
+  number.
+- [ ] When viewing a thread, comments should be grouped or labeled by which version they were made on.
+- [ ] Only users with reviewer, editor, or owner role in the project can comment.
+
+#### Phase 3.5 - New Version Upload
+
+- [ ] From the document detail page, allow uploading a new version of the document.
+- [ ] A modal should accept the new file and an optional change summary.
+- [ ] Only `owner` and `editor` roles can upload new versions.
+- [ ] Uploading automatically increments the version number and updates the document's current version.
+- [ ] A version that is locked cannot be overwritten — uploading a new version always creates a new entry.
+
+#### Phase 3.6 - Version Submission and Approval
+
+- [ ] A document owner or editor can submit a version for review, which locks it from further changes.
+- [ ] A project owner can approve a locked version.
+- [ ] Approval should only be possible if the version is currently under review.
+
+#### Phase 3.7 - Review Status Across Versions
+
+- [ ] Each thread tracks whether it is open or resolved per version.
+- [ ] When a new version is uploaded, all unresolved threads from the previous version carry forward as open on the new
+  version.
+- [ ] A thread can be marked resolved on the current version by the thread creator, editor, or owner.
+
+#### Phase 3.8 - Review Completeness and Approval Gate
+
+- [ ] A version cannot be approved while it has open unresolved threads.
+- [ ] The document detail page should surface how many open threads remain on the current version.
+- [ ] A project owner should have the option to force-approve, bypassing the open thread check.
 
 ### Phase 4 - Review Workflow Core
 
@@ -116,6 +200,6 @@
 
 - Database schema remains unchanged and is used as provided in `schema.sql`.
 - Architecture direction: controller -> service -> repository, with thin views and reusable UI components.
-- Immediate next focus: complete project listing/details so newly created projects are fully navigable.
 - You don't have to create multiple .md files for each phase, one summary file with clear sections for each phase is
   sufficient.
+- Don't build the UI part in single `.php` file, break into smaller chunks and components.

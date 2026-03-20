@@ -790,6 +790,117 @@
     gap: var(--spacing-sm);
 }
 
+/* Project Members Management */
+.project-members-card {
+    margin-top: var(--spacing-xl);
+    background-color: var(--color-bg-card);
+    border: var(--border-width-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.project-members-header {
+    padding: var(--spacing-lg);
+    border-bottom: var(--border-width-thin) solid var(--color-border);
+}
+
+.project-members-header h2 {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.project-members-header p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.project-members-table-wrapper {
+    overflow-x: auto;
+}
+
+.project-members-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.project-members-table th,
+.project-members-table td {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: var(--border-width-thin) solid var(--color-border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.project-members-table th {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+}
+
+.project-members-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.member-user-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.member-avatar-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--color-primary), #4ade80);
+    color: var(--color-bg-dark);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    flex-shrink: 0;
+}
+
+.member-user-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.member-user-name {
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+}
+
+.member-user-email,
+.member-joined-at,
+.member-action-placeholder {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-xs);
+}
+
+.member-role-control {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.member-role-select {
+    min-width: 120px;
+}
+
+.members-actions-column {
+    width: 140px;
+}
+
+.member-remove-btn {
+    min-width: 88px;
+}
+
 .role-name {
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-semibold);
@@ -852,6 +963,11 @@
     .role-select {
         order: 4;
         flex: 1;
+    }
+
+    .project-members-table th:nth-child(3),
+    .project-members-table td:nth-child(3) {
+        display: none;
     }
 }
 
