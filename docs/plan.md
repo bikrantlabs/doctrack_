@@ -165,10 +165,13 @@ number.
 #### Phase 3.5 - New Version Upload
 
 - [ ] From the document detail page, allow uploading a new version of the document.
+- [ ] There should be "Upload new version" button on the document detail page, visible to editors and owners.
 - [ ] A modal should accept the new file and an optional change summary.
 - [ ] Only `owner` and `editor` roles can upload new versions.
 - [ ] Uploading automatically increments the version number and updates the document's current version.
 - [ ] A version that is locked cannot be overwritten — uploading a new version always creates a new entry.
+- [ ] When uploading a new version, user can search/select the threads that have been resolved in this new upload, he
+  can search/select the thread(s) within the modal itself.
 
 #### Phase 3.6 - Version Submission and Approval
 

@@ -1,0 +1,259 @@
+/* ============================================
+   MINIMAL.CSS - Plain college-project theme
+   Keeps layout rules from existing files and removes polished theming.
+   ============================================ */
+
+html,
+body {
+    background: var(--color-bg-main);
+    color: var(--color-text-primary);
+}
+
+*,
+*::before,
+*::after {
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+body *,
+body *::before,
+body *::after {
+    transition-duration: 0ms !important;
+    animation-duration: 0ms !important;
+    animation-delay: 0ms !important;
+}
+
+.text-gradient,
+.hero-glow,
+.auth-glow,
+.decorative-blur,
+.gradient-line,
+.divider-gradient {
+    background: none !important;
+    -webkit-text-fill-color: currentColor !important;
+}
+
+.header,
+.site-header,
+.app-header,
+.topbar,
+.sidebar,
+.sidebar-header,
+.sidebar-footer,
+.modal,
+.modal-content,
+.toast,
+.card,
+.project-card,
+.document-card,
+.review-card,
+.team-card,
+.stat-card,
+.empty-state,
+.auth-card,
+.login-card,
+.register-card,
+.not-found-card {
+    background: var(--color-bg-card) !important;
+    border-color: var(--color-border) !important;
+    backdrop-filter: none !important;
+}
+
+.header {
+    background: #ffffff !important;
+}
+
+.logo,
+.sidebar-logo {
+    color: #212529 !important;
+}
+
+.dashboard-layout,
+.main-content,
+.app-main,
+.page,
+.auth-page,
+.not-found-page,
+.home-page {
+    background: var(--color-bg-main) !important;
+}
+
+.sidebar-link,
+.filter-tab,
+.view-btn,
+.project-menu,
+.btn,
+button,
+input,
+select,
+textarea {
+    border-radius: var(--radius-md) !important;
+}
+
+.sidebar-link:hover,
+.sidebar-user:hover,
+.filter-tab:hover,
+.view-btn:hover,
+.project-menu:hover,
+.document-card:hover,
+.project-card-link:hover .project-card,
+.team-member:hover,
+.review-item:hover,
+.btn:hover,
+button:hover {
+    transform: none !important;
+    background-color: var(--color-bg-hover) !important;
+}
+
+.sidebar-link.active,
+.filter-tab.active,
+.view-btn.active,
+.tab.active,
+.nav-link.active {
+    background: #e9ecef !important;
+    color: #212529 !important;
+}
+
+.sidebar-link.active::before {
+    background-color: #6c757d !important;
+    border-radius: 0 !important;
+}
+
+.btn-primary,
+.button-primary,
+.primary-button,
+.new-project-btn,
+.create-project-btn,
+button[type="submit"] {
+    background: #0d6efd !important;
+    border-color: #0d6efd !important;
+    color: #ffffff !important;
+}
+
+.btn-primary:hover,
+.button-primary:hover,
+.primary-button:hover,
+.new-project-btn:hover,
+.create-project-btn:hover,
+button[type="submit"]:hover {
+    background: #0b5ed7 !important;
+    border-color: #0a58ca !important;
+    color: #ffffff !important;
+}
+
+.btn-secondary,
+.button-secondary,
+.btn-outline,
+.button-outline,
+.import-btn {
+    background: #ffffff !important;
+    border-color: #ced4da !important;
+    color: #212529 !important;
+}
+
+.btn-secondary:hover,
+.button-secondary:hover,
+.btn-outline:hover,
+.button-outline:hover,
+.import-btn:hover {
+    background: #e9ecef !important;
+    border-color: #adb5bd !important;
+    color: #212529 !important;
+}
+
+.badge,
+[class*="badge"],
+.chip,
+[class*="chip"],
+.status,
+[class*="status"],
+.tag,
+[class*="tag"] {
+    background: #e9ecef !important;
+    color: #212529 !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: var(--radius-sm) !important;
+}
+
+.project-icon,
+[class*="project-icon"],
+.document-icon,
+[class*="document-icon"],
+.sidebar-user-avatar,
+.member-avatar,
+[class*="avatar"],
+.assignee-avatar,
+.user-avatar {
+    background: #e9ecef !important;
+    color: #212529 !important;
+    border-color: #dee2e6 !important;
+}
+
+.project-card-new:hover,
+.upload-zone:hover,
+.dropzone:hover {
+    background: #ffffff !important;
+    border-color: #adb5bd !important;
+}
+
+.project-card-new:hover .project-new-icon,
+.project-new-icon {
+    background: #e9ecef !important;
+}
+
+.project-card-new:hover .project-new-icon svg,
+.project-card-new:hover .project-new-text,
+a,
+.link,
+.breadcrumb-link:hover {
+    color: #0d6efd !important;
+}
+
+input,
+select,
+textarea,
+.search-input,
+.filter-select,
+.form-control {
+    background-color: #ffffff !important;
+    border-color: #ced4da !important;
+    color: #212529 !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.search-input:focus,
+.filter-select:focus,
+.form-control:focus {
+    border-color: #80bdff !important;
+    outline: 0 !important;
+}
+
+.toast-success,
+.toast-error,
+.toast-warning,
+.toast-info,
+.toast-primary,
+.toast-default {
+    background: #ffffff !important;
+    border-color: #dee2e6 !important;
+}
+
+.toast-success::before,
+.toast-error::before,
+.toast-warning::before,
+.toast-info::before,
+.toast-primary::before,
+.toast-default::before,
+.toast-progress {
+    background: #6c757d !important;
+}
+
+.modal-backdrop,
+.project-modal-backdrop,
+.create-project-modal-backdrop {
+    background: rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: none !important;
+}
