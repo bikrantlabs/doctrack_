@@ -2,22 +2,28 @@
 /** @var array{id:int, title:string, description:string|null, role:string, created_at:string, documentCount:int, memberCount:int} $project */
 ?>
 
-<a href="<?= e(url('/app/projects/' . $project['id'])) ?>" class="project-card-link">
-    <div class="project-card">
-        <div class="project-card-header">
-            <div class="project-icon project-icon-primary">
+
+<div class="project-card">
+    <div class="project-card-header">
+        <div class="project-icon project-icon-primary">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+        </div>
+        <form class="delete-project-form" action="<?= e(url('/app/projects/' . $project['id'])) ?>" method="post">
+            <input type="hidden" name="_method" value="DELETE">
+            <button class="delete-project-button" type="submit" aria-label="Delete Project">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                </svg>
-            </div>
-            <button class="project-menu" aria-label="Project menu">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="1"/>
-                    <circle cx="19" cy="12" r="1"/>
-                    <circle cx="5" cy="12" r="1"/>
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                    <path d="M10 11v6"/>
+                    <path d="M14 11v6"/>
+                    <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
                 </svg>
             </button>
-        </div>
+        </form>
+    </div>
+    <a href="<?= e(url('/app/projects/' . $project['id'])) ?>" class="project-card-link">
         <div class="project-card-body">
             <h3 class="project-title"><?= e($project['title']) ?></h3>
             <p class="project-description"><?= e($project['description'] ?? '') ?></p>
@@ -38,9 +44,9 @@
                 </div>
             </div>
         </div>
-        <div class="project-card-footer">
-            <span class="project-badge badge-<?= e($project['role']) ?>"><?= ucfirst($project['role']) ?></span>
-        </div>
+    </a>
+    <div class="project-card-footer">
+        <span class="project-badge badge-<?= e($project['role']) ?>"><?= ucfirst($project['role']) ?></span>
     </div>
-</a>
+</div>
 

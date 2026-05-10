@@ -4,7 +4,6 @@
 
 /* Dashboard Layout */
 .dashboard-layout {
-    display: flex;
     min-height: 100vh;
     background-color: var(--color-bg-main);
 }
@@ -250,16 +249,9 @@
    MAIN CONTENT AREA
    ================== */
 .dashboard-main {
-    flex: 1;
-    margin-left: var(--sidebar-width);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    transition: margin-left var(--transition-base);
-}
-
-.sidebar.collapsed ~ .dashboard-main {
-    margin-left: 72px;
 }
 
 /* Dashboard Header */
@@ -280,30 +272,35 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
+    min-width: 0;
 }
 
-.sidebar-toggle {
-    width: 40px;
-    height: 40px;
+.app-navbar-logo {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background: transparent;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    border-radius: var(--radius-md);
-    transition: all var(--transition-fast);
-}
-
-.sidebar-toggle:hover {
-    background-color: var(--color-bg-hover);
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
     color: var(--color-text-primary);
+    text-decoration: none;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
 }
 
-.sidebar-toggle svg {
-    width: 20px;
-    height: 20px;
+.app-navbar-logo-icon {
+    width: 28px;
+    height: 28px;
+    color: var(--color-primary);
+}
+
+.app-navbar-user {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: var(--border-width-thin) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-bg-card);
+    max-width: 280px;
 }
 
 .dashboard-breadcrumb {
@@ -917,18 +914,6 @@
 }
 
 @media (max-width: 768px) {
-    .sidebar {
-        transform: translateX(-100%);
-    }
-
-    .sidebar.open {
-        transform: translateX(0);
-    }
-
-    .dashboard-main {
-        margin-left: 0;
-    }
-
     .dashboard-content {
         padding: var(--spacing-md);
     }
@@ -944,6 +929,12 @@
     }
 
     .dashboard-search {
+        display: none;
+    }
+
+    .app-navbar-logo span,
+    .app-navbar-user .sidebar-user-info,
+    .dashboard-breadcrumb {
         display: none;
     }
 

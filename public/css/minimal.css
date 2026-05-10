@@ -5,23 +5,23 @@
 
 html,
 body {
-    background: var(--color-bg-main);
-    color: var(--color-text-primary);
+  background: var(--color-bg-main);
+  color: var(--color-text-primary);
 }
 
 *,
 *::before,
 *::after {
-    box-shadow: none !important;
-    text-shadow: none !important;
+  box-shadow: none;
+  text-shadow: none;
 }
 
 body *,
 body *::before,
 body *::after {
-    transition-duration: 0ms !important;
-    animation-duration: 0ms !important;
-    animation-delay: 0ms !important;
+  transition-duration: 0ms;
+  animation-duration: 0ms;
+  animation-delay: 0ms;
 }
 
 .text-gradient,
@@ -30,43 +30,23 @@ body *::after {
 .decorative-blur,
 .gradient-line,
 .divider-gradient {
-    background: none !important;
-    -webkit-text-fill-color: currentColor !important;
-}
-
-.header,
-.site-header,
-.app-header,
-.topbar,
-.sidebar,
-.sidebar-header,
-.sidebar-footer,
-.modal,
-.modal-content,
-.toast,
-.card,
-.project-card,
-.document-card,
-.review-card,
-.team-card,
-.stat-card,
-.empty-state,
-.auth-card,
-.login-card,
-.register-card,
-.not-found-card {
-    background: var(--color-bg-card) !important;
-    border-color: var(--color-border) !important;
-    backdrop-filter: none !important;
+  background: none;
+  -webkit-text-fill-color: currentColor;
 }
 
 .header {
-    background: #ffffff !important;
+  background: var(--color-bg-card) !important;
+  border-color: var(--color-border) !important;
+  backdrop-filter: none;
+}
+
+.header {
+  background: #ffffff;
 }
 
 .logo,
 .sidebar-logo {
-    color: #212529 !important;
+  color: #212529;
 }
 
 .dashboard-layout,
@@ -76,19 +56,20 @@ body *::after {
 .auth-page,
 .not-found-page,
 .home-page {
-    background: var(--color-bg-main) !important;
+  background: var(--color-bg-main);
 }
 
 .sidebar-link,
 .filter-tab,
 .view-btn,
 .project-menu,
+.delete-project-button,
 .btn,
 button,
 input,
 select,
 textarea {
-    border-radius: var(--radius-md) !important;
+  border-radius: var(--radius-md);
 }
 
 .sidebar-link:hover,
@@ -96,14 +77,15 @@ textarea {
 .filter-tab:hover,
 .view-btn:hover,
 .project-menu:hover,
+.delete-project-button:hover,
 .document-card:hover,
 .project-card-link:hover .project-card,
 .team-member:hover,
 .review-item:hover,
 .btn:hover,
 button:hover {
-    transform: none !important;
-    background-color: var(--color-bg-hover) !important;
+  transform: none;
+  background-color: var(--color-bg-hover);
 }
 
 .sidebar-link.active,
@@ -111,35 +93,18 @@ button:hover {
 .view-btn.active,
 .tab.active,
 .nav-link.active {
-    background: #e9ecef !important;
-    color: #212529 !important;
+  background: #e9ecef;
+  color: #212529;
 }
 
 .sidebar-link.active::before {
-    background-color: #6c757d !important;
-    border-radius: 0 !important;
+  background-color: #6c757d;
+  border-radius: 0;
 }
 
-.btn-primary,
-.button-primary,
-.primary-button,
-.new-project-btn,
-.create-project-btn,
-button[type="submit"] {
-    background: #0d6efd !important;
-    border-color: #0d6efd !important;
-    color: #ffffff !important;
-}
-
-.btn-primary:hover,
-.button-primary:hover,
-.primary-button:hover,
-.new-project-btn:hover,
-.create-project-btn:hover,
-button[type="submit"]:hover {
-    background: #0b5ed7 !important;
-    border-color: #0a58ca !important;
-    color: #ffffff !important;
+button {
+  outline: none;
+  border: none;
 }
 
 .btn-secondary,
@@ -147,9 +112,9 @@ button[type="submit"]:hover {
 .btn-outline,
 .button-outline,
 .import-btn {
-    background: #ffffff !important;
-    border-color: #ced4da !important;
-    color: #212529 !important;
+  background: #ffffff;
+  border-color: #ced4da;
+  color: #212529;
 }
 
 .btn-secondary:hover,
@@ -157,9 +122,9 @@ button[type="submit"]:hover {
 .btn-outline:hover,
 .button-outline:hover,
 .import-btn:hover {
-    background: #e9ecef !important;
-    border-color: #adb5bd !important;
-    color: #212529 !important;
+  background: #e9ecef;
+  border-color: #adb5bd;
+  color: #212529;
 }
 
 .badge,
@@ -170,10 +135,10 @@ button[type="submit"]:hover {
 [class*="status"],
 .tag,
 [class*="tag"] {
-    background: #e9ecef !important;
-    color: #212529 !important;
-    border: 1px solid #dee2e6 !important;
-    border-radius: var(--radius-sm) !important;
+  background: #e9ecef;
+  color: #212529;
+  border: 1px solid #dee2e6;
+  border-radius: var(--radius-sm);
 }
 
 .project-icon,
@@ -185,21 +150,21 @@ button[type="submit"]:hover {
 [class*="avatar"],
 .assignee-avatar,
 .user-avatar {
-    background: #e9ecef !important;
-    color: #212529 !important;
-    border-color: #dee2e6 !important;
+  background: #e9ecef;
+  color: #212529;
+  border-color: #dee2e6;
 }
 
 .project-card-new:hover,
 .upload-zone:hover,
 .dropzone:hover {
-    background: #ffffff !important;
-    border-color: #adb5bd !important;
+  background: #ffffff;
+  border-color: #adb5bd;
 }
 
 .project-card-new:hover .project-new-icon,
 .project-new-icon {
-    background: #e9ecef !important;
+  background: #e9ecef;
 }
 
 .project-card-new:hover .project-new-icon svg,
@@ -207,7 +172,7 @@ button[type="submit"]:hover {
 a,
 .link,
 .breadcrumb-link:hover {
-    color: #0d6efd !important;
+  color: #0d6efd;
 }
 
 input,
@@ -216,9 +181,9 @@ textarea,
 .search-input,
 .filter-select,
 .form-control {
-    background-color: #ffffff !important;
-    border-color: #ced4da !important;
-    color: #212529 !important;
+  background-color: #ffffff;
+  border-color: #ced4da;
+  color: #212529;
 }
 
 input:focus,
@@ -227,8 +192,8 @@ textarea:focus,
 .search-input:focus,
 .filter-select:focus,
 .form-control:focus {
-    border-color: #80bdff !important;
-    outline: 0 !important;
+  border-color: #80bdff;
+  outline: 0;
 }
 
 .toast-success,
@@ -237,8 +202,8 @@ textarea:focus,
 .toast-info,
 .toast-primary,
 .toast-default {
-    background: #ffffff !important;
-    border-color: #dee2e6 !important;
+  background: #ffffff;
+  border-color: #dee2e6;
 }
 
 .toast-success::before,
@@ -248,12 +213,12 @@ textarea:focus,
 .toast-primary::before,
 .toast-default::before,
 .toast-progress {
-    background: #6c757d !important;
+  background: #6c757d;
 }
 
 .modal-backdrop,
 .project-modal-backdrop,
 .create-project-modal-backdrop {
-    background: rgba(0, 0, 0, 0.35) !important;
-    backdrop-filter: none !important;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: none;
 }

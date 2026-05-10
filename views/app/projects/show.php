@@ -5,28 +5,18 @@
 $currentUrl = current_path();
 $description = trim((string) ($project['description'] ?? ''));
 $canUploadDocument = in_array((string) ($project['role'] ?? ''), ['owner', 'editor'], true);
+$canManageMembers = (string) ($project['role'] ?? '') === 'owner';
 ?>
 
 <div class="dashboard-layout">
-    <?php require BASE_PATH . '/views/app/components/app-sidebar.php'; ?>
-
     <main class="dashboard-main">
-        <header class="dashboard-header">
-            <div class="dashboard-header-left">
-                <button class="sidebar-toggle" aria-label="Toggle sidebar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="12" x2="21" y2="12"/>
-                        <line x1="3" y1="6" x2="21" y2="6"/>
-                        <line x1="3" y1="18" x2="21" y2="18"/>
-                    </svg>
-                </button>
-                <div class="dashboard-breadcrumb">
-                    <a href="<?= e(url('/app')) ?>" class="breadcrumb-link">Projects</a>
-                    <span class="breadcrumb-separator">/</span>
-                    <span><?= e($project['title']) ?></span>
-                </div>
-            </div>
-        </header>
+        <?php
+        $breadcrumbs = [
+            ['label' => 'Projects', 'href' => '/app'],
+            ['label' => (string) $project['title']],
+        ];
+        require BASE_PATH . '/views/app/components/app-header.php';
+        ?>
 
         <div class="dashboard-content">
             <div class="page-header">
@@ -37,6 +27,11 @@ $canUploadDocument = in_array((string) ($project['role'] ?? ''), ['owner', 'edit
                     </p>
                 </div>
                 <div class="page-header-right">
+                    <?php if ($canManageMembers): ?>
+                        <button type="button" class="btn btn-outline" data-modal="add-members-modal">
+                            Add Members
+                        </button>
+                    <?php endif; ?>
                     <?php if ($canUploadDocument): ?>
                         <button type="button" class="btn btn-primary" data-modal="upload-document-modal">
                             Upload Document
@@ -72,6 +67,10 @@ $canUploadDocument = in_array((string) ($project['role'] ?? ''), ['owner', 'edit
 </div>
 
 <?php require BASE_PATH . '/views/app/modals/upload-document.php'; ?>
+<?php if ($canManageMembers): ?>
+    <?php require BASE_PATH . '/views/app/modals/add-members.php'; ?>
+    <script src="<?= e(url('/js/app/add-members.js')) ?>" defer></script>
+<?php endif; ?>
 <script src="<?= e(url('/js/app/project-members.js')) ?>" defer></script>
 <script src="<?= e(url('/js/app/project-document-upload.js')) ?>" defer></script>
 

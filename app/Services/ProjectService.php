@@ -118,6 +118,30 @@ final class ProjectService
         return $this->projects->getProjectDetailForUser($projectId, $userId);
     }
 
+    /** @return array{ok:bool,message:string} */
+    public function deleteProject(int $projectId, int $actingUserId): array
+    {
+        if ($projectId <= 0 || $actingUserId <= 0) {
+            return ['ok' => false, 'message' => 'Invalid request.'];
+        }
+
+        $actingRole = $this->projects->getUserRoleInProject($projectId, $actingUserId);
+        if ($actingRole === null) {
+            return ['ok' => false, 'message' => 'Project not found.'];
+        }
+
+        if ($actingRole !== 'owner') {
+            return ['ok' => false, 'message' => 'Only project owners can delete projects.'];
+        }
+
+        $deleted = $this->projects->deleteProject($projectId);
+        if (!$deleted) {
+            return ['ok' => false, 'message' => 'Could not delete project.'];
+        }
+
+        return ['ok' => true, 'message' => 'Project deleted successfully.'];
+    }
+
     public function normalizeScope(string $scope): string
     {
         $scope = trim($scope);
@@ -176,6 +200,76 @@ final class ProjectService
         }
 
         return ['ok' => true, 'message' => 'Member role updated successfully.'];
+    }
+
+    /**
+     * @param array<int, array{user_id:int,role:string}> $members
+     * @return array{ok:bool,message:string,invitedCount?:int}
+     */
+    public function inviteMembersToProject(int $projectId, int $actingUserId, array $members): array
+    {
+        if ($projectId <= 0 || $actingUserId <= 0) {
+            return ['ok' => false, 'message' => 'Invalid request.'];
+        }
+
+        $actingRole = $this->projects->getUserRoleInProject($projectId, $actingUserId);
+        if ($actingRole !== 'owner') {
+            return ['ok' => false, 'message' => 'Only project owners can add members.'];
+        }
+
+        $normalizedMembers = [];
+        foreach ($members as $member) {
+            if (!isset($member['user_id'], $member['role'])) {
+                return ['ok' => false, 'message' => 'Each member must include user_id and role.'];
+            }
+
+            $userId = (int) $member['user_id'];
+            $role = trim((string) $member['role']);
+
+            if ($userId <= 0) {
+                return ['ok' => false, 'message' => 'Invalid user selected.'];
+            }
+
+            if ($userId === $actingUserId) {
+                return ['ok' => false, 'message' => 'Owners cannot invite themselves.'];
+            }
+
+            if (!in_array($role, self::ALLOWED_MEMBER_ROLES, true)) {
+                return ['ok' => false, 'message' => 'Invalid member role selected.'];
+            }
+
+            $normalizedMembers[$userId] = ['user_id' => $userId, 'role' => $role];
+        }
+
+        if ($normalizedMembers === []) {
+            return ['ok' => false, 'message' => 'Please select at least one member to invite.'];
+        }
+
+        $memberIds = array_keys($normalizedMembers);
+        $existingIds = $this->users->findByIds($memberIds);
+        sort($existingIds);
+        sort($memberIds);
+
+        if ($existingIds !== $memberIds) {
+            return ['ok' => false, 'message' => 'One or more selected users no longer exist.'];
+        }
+
+        foreach ($memberIds as $memberId) {
+            if ($this->projects->getUserRoleInProject($projectId, $memberId) !== null) {
+                return ['ok' => false, 'message' => 'One or more selected users are already project members.'];
+            }
+        }
+
+        $invitedCount = $this->projects->inviteMembers($projectId, $actingUserId, array_values($normalizedMembers));
+        if ($invitedCount === 0) {
+            return ['ok' => false, 'message' => 'Could not send invitations.'];
+        }
+
+        return [
+            'ok' => true,
+            'message' => $invitedCount === 1 ? 'Invitation sent successfully.' : 'Invitations sent successfully.',
+            'invitedCount' => $invitedCount,
+        ];
     }
 
     /** @return array{ok:bool,message:string} */

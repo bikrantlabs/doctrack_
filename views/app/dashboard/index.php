@@ -18,51 +18,18 @@ $scopeSubtitle = [
 <!-- Projects Page - Main Container -->
 
 <div class="dashboard-layout">
-    <!-- Sidebar (same as dashboard) -->
-    <?php require BASE_PATH . '/views/app/components/app-sidebar.php'; ?>
-
-
     <!-- Main Content -->
     <main class="dashboard-main">
 
-        <!-- Header -->
-        <header class="dashboard-header">
-            <div class="dashboard-header-left">
-                <button class="sidebar-toggle" aria-label="Toggle sidebar">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <line x1="3" y1="12" x2="21" y2="12"/>
-                        <line x1="3" y1="6" x2="21" y2="6"/>
-                        <line x1="3" y1="18" x2="21" y2="18"/>
-                    </svg>
-                </button>
-                <div class="dashboard-breadcrumb">
-                    <a href="<?= e(url('/app')) ?>" class="breadcrumb-link">Dashboard</a>
-                    <span class="breadcrumb-separator">/</span>
-                    <span>Projects</span>
-                </div>
-            </div>
-            <div class="dashboard-header-right">
-                <div class="dashboard-search">
-                    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="M21 21l-4.35-4.35"/>
-                    </svg>
-                    <input type="text" placeholder="Search projects..." class="search-input" aria-label="Search projects">
-                </div>
-                <div class="notifications-wrapper">
-                    <button class="header-icon-btn notifications-trigger" aria-label="Notifications" data-notifications-trigger="1">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                        </svg>
-                        <?php if ($pendingInvitationCount > 0): ?>
-                            <span class="notification-badge"><?= min($pendingInvitationCount, 9) ?><?= $pendingInvitationCount > 9 ? '+' : '' ?></span>
-                        <?php endif; ?>
-                    </button>
-                    <?php require BASE_PATH . '/views/app/components/notifications-dropdown.php'; ?>
-                </div>
-            </div>
-        </header>
+        <?php
+        $breadcrumbs = [
+            ['label' => 'Dashboard', 'href' => '/app'],
+            ['label' => 'Projects'],
+        ];
+        $showSearch = true;
+        $showNotifications = true;
+        require BASE_PATH . '/views/app/components/app-header.php';
+        ?>
 
         <!-- Projects Content -->
         <div class="dashboard-content">

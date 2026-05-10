@@ -1,6 +1,6 @@
 CREATE TABLE users
 (
-    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id         INT AUTO_INCREMENT PRIMARY KEY,
     email      VARCHAR(255) UNIQUE NOT NULL,
     fullname   VARCHAR(255)        NOT NULL,
     password   VARCHAR(255),
@@ -10,7 +10,7 @@ CREATE TABLE users
 
 CREATE TABLE projects
 (
-    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id          INT AUTO_INCREMENT PRIMARY KEY,
     title       VARCHAR(255) NOT NULL,
     description TEXT,
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -18,10 +18,10 @@ CREATE TABLE projects
 
 CREATE TABLE user_projects
 (
-    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id         INT AUTO_INCREMENT PRIMARY KEY,
 
-    user_id    BIGINT                                         NOT NULL,
-    project_id BIGINT                                         NOT NULL,
+    user_id    INT                                         NOT NULL,
+    project_id INT                                         NOT NULL,
 
     role       ENUM ("owner", "reviewer", "editor", "viewer") NOT NULL,
 
@@ -36,12 +36,12 @@ CREATE TABLE user_projects
 
 CREATE TABLE documents
 (
-    id                 BIGINT PRIMARY KEY,
-    project_id         BIGINT NOT NULL,
+    id                 INT PRIMARY KEY,
+    project_id         INT NOT NULL,
     title              VARCHAR(255),
 
-    created_by         BIGINT NOT NULL,
-    current_version_id BIGINT NOT NULL,
+    created_by         INT NOT NULL,
+    current_version_id INT NOT NULL,
 
     FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
     FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE CASCADE,
@@ -51,12 +51,12 @@ CREATE TABLE documents
 
 CREATE TABLE document_versions
 (
-    ID             BIGINT PRIMARY KEY,
-    document_id    BIGINT               NOT NULL,
+    ID             INT PRIMARY KEY,
+    document_id    INT               NOT NULL,
     version_number INT                  NOT NULL,
     file_path      VARCHAR(500)         NOT NULL,
     file_type      ENUM ("pdf", "docx") NOT NULL,
-    uploaded_by    BIGINT               NOT NULL,
+    uploaded_by    INT               NOT NULL,
     change_summary TEXT,
     status         ENUM ("draft", "under_review", "approved"),
     is_locked      BOOLEAN   DEFAULT FALSE,
@@ -70,9 +70,9 @@ CREATE TABLE document_versions
 
 CREATE TABLE review_threads
 (
-    id          BIGINT PRIMARY KEY,
-    document_id BIGINT NOT NULL,
-    created_by  BIGINT NOT NULL,
+    id          INT PRIMARY KEY,
+    document_id INT NOT NULL,
+    created_by  INT NOT NULL,
     title       VARCHAR(255),
 
     created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -83,10 +83,10 @@ CREATE TABLE review_threads
 
 CREATE TABLE review_comments
 (
-    id                  BIGINT PRIMARY KEY,
-    review_thread_id    BIGINT NOT NULL,
-    document_version_id BIGINT NOT NULL,
-    reviewer_id         BIGINT NOT NULL,
+    id                  INT PRIMARY KEY,
+    review_thread_id    INT NOT NULL,
+    document_version_id INT NOT NULL,
+    reviewer_id         INT NOT NULL,
     page_number         INT    NOT NULL,
     comment             TEXT   NOT NULL,
     created_at          TIMESTAMP,
@@ -98,10 +98,10 @@ CREATE TABLE review_comments
 
 CREATE TABLE review_status
 (
-    review_thread_id    BIGINT,
-    document_version_id BIGINT,
-    status              ENUM ("open","resolved") NOT NULL,
-    resolved_by         BIGINT                   NULL,
+    review_thread_id    INT,
+    document_version_id INT,
+    status              ENUM ("open","resolved", "marked_for_review") NOT NULL,
+    resolved_by         INT                   NULL,
     resolved_at         TIMESTAMP                NULL,
 
     PRIMARY KEY (review_thread_id, document_version_id),
@@ -112,11 +112,11 @@ CREATE TABLE review_status
 
 CREATE TABLE project_invitations
 (
-    id              BIGINT AUTO_INCREMENT PRIMARY KEY,
+    id              INT AUTO_INCREMENT PRIMARY KEY,
 
-    project_id      BIGINT                                   NOT NULL,
-    invited_user_id BIGINT                                   NOT NULL,
-    invited_by      BIGINT                                   NOT NULL,
+    project_id      INT                                   NOT NULL,
+    invited_user_id INT                                   NOT NULL,
+    invited_by      INT                                   NOT NULL,
 
     role            ENUM ("reviewer", "editor", "viewer")    NOT NULL,
     status          ENUM ("pending", "accepted", "rejected") NOT NULL DEFAULT "pending",

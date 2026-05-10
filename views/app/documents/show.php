@@ -10,8 +10,24 @@
     <?php require BASE_PATH . '/views/app/components/document-detail-sidebar.php'; ?>
 </div>
 
+<?php if (!(bool) ($document['is_approved'] ?? false)): ?>
+    <?php require BASE_PATH . '/views/app/modals/upload-document-version.php'; ?>
+<?php endif; ?>
+
+<?php
+$canApproveVersionModal = !(bool) ($document['is_approved'] ?? false)
+    && (int) $selectedVersion['id'] === (int) $document['current_version_id']
+    && (string) ($document['project_role'] ?? '') === 'reviewer'
+    && (string) ($selectedVersion['status'] ?? 'draft') !== 'approved';
+?>
+<?php if ($canApproveVersionModal): ?>
+    <?php require BASE_PATH . '/views/app/modals/approve-document-version.php'; ?>
+    <script src="<?= e(url('/js/app/document-version-approval.js')) ?>" defer></script>
+<?php endif; ?>
+
 <script src="<?= e(url('/js/libraries/mammoth.js')) ?>" defer></script>
 <script src="<?= e(url('/js/libraries/pdfjs.js')) ?>" type="module"></script>
 <script src="<?= e(url('/js/app/document-viewer.js')) ?>" defer></script>
 <script src="<?= e(url('/js/app/document-review-threads.js')) ?>" defer></script>
+<script src="<?= e(url('/js/app/document-version-upload.js')) ?>" defer></script>
 

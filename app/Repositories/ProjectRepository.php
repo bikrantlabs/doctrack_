@@ -273,6 +273,47 @@ final class ProjectRepository
         return $statement->rowCount() > 0;
     }
 
+    /**
+     * @param array<int, array{user_id:int,role:string}> $members
+     */
+    public function inviteMembers(int $projectId, int $invitedBy, array $members): int
+    {
+        if ($members === []) {
+            return 0;
+        }
+
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $statement = $pdo->prepare(
+                'INSERT INTO project_invitations (project_id, invited_user_id, invited_by, role, status)
+                 VALUES (:project_id, :invited_user_id, :invited_by, :role, \'pending\')
+                 ON DUPLICATE KEY UPDATE
+                    invited_by = VALUES(invited_by),
+                    role = VALUES(role),
+                    status = \'pending\''
+            );
+
+            $invitedCount = 0;
+            foreach ($members as $member) {
+                $statement->execute([
+                    'project_id' => $projectId,
+                    'invited_user_id' => $member['user_id'],
+                    'invited_by' => $invitedBy,
+                    'role' => $member['role'],
+                ]);
+                $invitedCount++;
+            }
+
+            $pdo->commit();
+            return $invitedCount;
+        } catch (Throwable $exception) {
+            $pdo->rollBack();
+            throw $exception;
+        }
+    }
+
     public function removeMember(int $projectId, int $memberUserId): bool
     {
         $pdo = Database::connection();
@@ -289,5 +330,56 @@ final class ProjectRepository
         ]);
 
         return $statement->rowCount() > 0;
+    }
+
+    public function deleteProject(int $projectId): bool
+    {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $projectStatement = $pdo->prepare('SELECT id FROM projects WHERE id = :project_id LIMIT 1');
+            $projectStatement->execute(['project_id' => $projectId]);
+            if ($projectStatement->fetchColumn() === false) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $statements = [
+                'DELETE rc
+                 FROM review_comments rc
+                 INNER JOIN review_threads rt ON rt.id = rc.review_thread_id
+                 INNER JOIN documents d ON d.id = rt.document_id
+                 WHERE d.project_id = :project_id',
+                'DELETE rs
+                 FROM review_status rs
+                 INNER JOIN review_threads rt ON rt.id = rs.review_thread_id
+                 INNER JOIN documents d ON d.id = rt.document_id
+                 WHERE d.project_id = :project_id',
+                'DELETE rt
+                 FROM review_threads rt
+                 INNER JOIN documents d ON d.id = rt.document_id
+                 WHERE d.project_id = :project_id',
+                'DELETE dv
+                 FROM document_versions dv
+                 INNER JOIN documents d ON d.id = dv.document_id
+                 WHERE d.project_id = :project_id',
+                'DELETE FROM documents WHERE project_id = :project_id',
+                'DELETE FROM project_invitations WHERE project_id = :project_id',
+                'DELETE FROM user_projects WHERE project_id = :project_id',
+                'DELETE FROM projects WHERE id = :project_id',
+            ];
+
+            foreach ($statements as $sql) {
+                $statement = $pdo->prepare($sql);
+                $statement->execute(['project_id' => $projectId]);
+            }
+
+            $pdo->commit();
+            return true;
+        } catch (Throwable $exception) {
+            $pdo->rollBack();
+            throw $exception;
+        }
     }
 }

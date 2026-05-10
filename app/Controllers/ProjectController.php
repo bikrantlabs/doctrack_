@@ -66,6 +66,19 @@ final class ProjectController extends Controller
         $this->json($result, 201);
     }
 
+    public function delete(string $projectId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->flash('error', 'Please sign in to continue.');
+            $this->redirect('/login');
+        }
+
+        $result = $this->projectService->deleteProject((int) $projectId, (int) $user['id']);
+        $this->flash($result['ok'] ? 'success' : 'error', $result['message']);
+        $this->redirect('/app');
+    }
+
     public function show(string $projectId): void
     {
         $user = Auth::user();
@@ -76,15 +89,13 @@ final class ProjectController extends Controller
 
         $id = (int) $projectId;
         if ($id <= 0) {
-            http_response_code(404);
-            echo 'Page not found';
+            $this->notFound();
             return;
         }
 
         $project = $this->projectService->fetchProjectDetailForUser($id, (int) $user['id']);
         if ($project === null) {
-            http_response_code(404);
-            echo 'Page not found';
+            $this->notFound();
             return;
         }
 
@@ -127,6 +138,39 @@ final class ProjectController extends Controller
         $this->json($result, $statusCode);
     }
 
+    public function uploadDocumentVersion(string $projectId, string $documentId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $file = $_FILES['version_file'] ?? null;
+        if (!is_array($file)) {
+            $this->json(['ok' => false, 'message' => 'Please choose a file to upload.'], 422);
+            return;
+        }
+
+        $reviewThreadIds = $_POST['review_thread_ids'] ?? [];
+        if (!is_array($reviewThreadIds)) {
+            $reviewThreadIds = [];
+        }
+
+        $result = $this->documentService->uploadNewDocumentVersion(
+            (int) $projectId,
+            (int) $documentId,
+            (int) $user['id'],
+            (int) ($_POST['base_version_id'] ?? 0),
+            trim((string) ($_POST['change_summary'] ?? '')),
+            $file,
+            $reviewThreadIds
+        );
+
+        $statusCode = $result['ok'] ? 201 : 422;
+        $this->json($result, $statusCode);
+    }
+
     public function showDocument(string $projectId, string $documentId): void
     {
         $user = Auth::user();
@@ -138,8 +182,7 @@ final class ProjectController extends Controller
         $projectIdInt = (int) $projectId;
         $documentIdInt = (int) $documentId;
         if ($projectIdInt <= 0 || $documentIdInt <= 0) {
-            http_response_code(404);
-            echo 'Page not found';
+            $this->notFound();
             return;
         }
 
@@ -152,8 +195,7 @@ final class ProjectController extends Controller
         );
 
         if ($payload === null) {
-            http_response_code(404);
-            echo 'Page not found';
+            $this->notFound();
             return;
         }
 
@@ -244,6 +286,29 @@ final class ProjectController extends Controller
         $this->json($result, $statusCode);
     }
 
+    public function approveDocumentVersion(string $projectId, string $documentId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $payload = $this->readPayload();
+        $versionId = (int) ($payload['version_id'] ?? 0);
+
+        $result = $this->documentService->approveDocumentVersionForUser(
+            (int) $projectId,
+            (int) $documentId,
+            (int) $user['id'],
+            $versionId
+        );
+        $logFile = __DIR__ . '/debug.log';
+        file_put_contents($logFile, print_r($payload, true) . PHP_EOL, FILE_APPEND);
+        $statusCode = $result['ok'] ? 200 : 422;
+        $this->json($result, $statusCode);
+    }
+
     public function streamDocumentVersion(string $versionId): void
     {
         $user = Auth::user();
@@ -296,6 +361,32 @@ final class ProjectController extends Controller
         );
 
         $statusCode = $result['ok'] ? 200 : 422;
+        $this->json($result, $statusCode);
+    }
+
+    public function addMembers(string $projectId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $payload = $this->readPayload();
+        $members = $payload['members'] ?? [];
+
+        if (!is_array($members)) {
+            $this->json(['ok' => false, 'message' => 'Invalid members payload.'], 422);
+            return;
+        }
+
+        $result = $this->projectService->inviteMembersToProject(
+            (int) $projectId,
+            (int) $user['id'],
+            $members
+        );
+
+        $statusCode = $result['ok'] ? 201 : 422;
         $this->json($result, $statusCode);
     }
 

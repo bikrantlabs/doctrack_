@@ -42,12 +42,16 @@ $router = new Router();
 $router->get('/', [HomeController::class, 'index']);
 $router->get('/app', [HomeController::class, 'appDashboard']);
 $router->get('/app/projects/{id}', [ProjectController::class, 'show']);
+$router->delete('/app/projects/{id}', [ProjectController::class, 'delete']);
+$router->post('/app/projects/{projectId}/members', [ProjectController::class, 'addMembers']);
 $router->get('/app/projects/{projectId}/{documentId}', [ProjectController::class, 'showDocument']);
 $router->post('/app/projects/{projectId}/{documentId}/threads', [ProjectController::class, 'createReviewThread']);
 $router->post('/app/projects/{projectId}/{documentId}/threads/{threadId}/comments', [ProjectController::class, 'addReviewComment']);
 $router->post('/app/projects/{projectId}/{documentId}/threads/{threadId}/resolve', [ProjectController::class, 'resolveReviewThread']);
 $router->get('/app/documents/file/{versionId}', [ProjectController::class, 'streamDocumentVersion']);
 $router->post('/app/projects/{projectId}/documents', [ProjectController::class, 'uploadDocument']);
+$router->post('/app/projects/{projectId}/{documentId}/versions', [ProjectController::class, 'uploadDocumentVersion']);
+$router->post('/app/projects/{projectId}/{documentId}/approve', [ProjectController::class, 'approveDocumentVersion']);
 $router->post('/app/projects/{projectId}/members/{memberUserId}/role', [ProjectController::class, 'updateMemberRole']);
 $router->post('/app/projects/{projectId}/members/{memberUserId}/remove', [ProjectController::class, 'removeMember']);
 $router->get('/app/invitations', [ProjectController::class, 'getInvitations']);
@@ -62,4 +66,12 @@ $router->get('/register', [AuthController::class, 'showRegister']);
 $router->post('/register', [AuthController::class, 'register']);
 $router->get('/logout', [AuthController::class, 'logout']);
 
-$router->dispatch($_SERVER['REQUEST_METHOD'] ?? 'GET', $requestedPath);
+$requestMethod = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
+if ($requestMethod === 'POST') {
+    $spoofedMethod = strtoupper((string) ($_POST['_method'] ?? ''));
+    if (in_array($spoofedMethod, ['DELETE'], true)) {
+        $requestMethod = $spoofedMethod;
+    }
+}
+
+$router->dispatch($requestMethod, $requestedPath);

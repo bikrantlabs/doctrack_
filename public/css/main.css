@@ -1,4 +1,5 @@
 @import "theme.css";
+@import "minimal.css";
 @import "common.css";
 /*@import "form.css";*/
 @import "home.css";
@@ -8,10 +9,9 @@
 @import "not_found.css";
 @import "app/app.css";
 @import "app/documents.css";
-@import "app/projects.css";
 @import "app/create-project-modal.css";
 @import "app/invitations.css";
 @import "app/reviews.css";
 @import "app/team.css";
-@import "minimal.css";
+@import "app/projects.css";
 /* Base Styles */

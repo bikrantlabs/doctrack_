@@ -19,6 +19,11 @@ final class Router
         $this->map('POST', $path, $handler);
     }
 
+    public function delete(string $path, callable|array $handler): void
+    {
+        $this->map('DELETE', $path, $handler);
+    }
+
     public function dispatch(string $method, string $path): void
     {
         $normalizedPath = $this->normalizePath($path);
@@ -41,7 +46,7 @@ final class Router
         }
 
         http_response_code(404);
-        echo 'Page not found';
+        View::render('not-found', [], 'Page not found');
     }
 
     private function map(string $method, string $path, callable|array $handler): void

@@ -116,6 +116,135 @@ final class DocumentRepository
         }
     }
 
+    public function createDocumentVersion(
+        int $versionId,
+        int $documentId,
+        int $uploadedBy,
+        string $storedFilePath,
+        string $fileType,
+        ?string $changeSummary = null,
+        array $markedForReviewThreadIds = []
+    ): int {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $documentStatement = $pdo->prepare(
+                'SELECT id
+                 FROM documents
+                 WHERE id = :document_id
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $documentStatement->execute(['document_id' => $documentId]);
+
+            if ($documentStatement->fetchColumn() === false) {
+                throw new \RuntimeException('Document not found.');
+            }
+
+            $approvedStatement = $pdo->prepare(
+                'SELECT COUNT(*)
+                 FROM document_versions
+                 WHERE document_id = :document_id
+                   AND status = \'approved\''
+            );
+            $approvedStatement->execute(['document_id' => $documentId]);
+            if ((int) $approvedStatement->fetchColumn() > 0) {
+                throw new \RuntimeException('Approved documents cannot receive new versions.');
+            }
+
+            $versionNumberStatement = $pdo->prepare(
+                'SELECT COALESCE(MAX(version_number), 0) + 1
+                 FROM document_versions
+                 WHERE document_id = :document_id'
+            );
+            $versionNumberStatement->execute(['document_id' => $documentId]);
+            $versionNumber = (int) $versionNumberStatement->fetchColumn();
+
+            $versionStatement = $pdo->prepare(
+                'INSERT INTO document_versions (
+                    id,
+                    document_id,
+                    version_number,
+                    file_path,
+                    file_type,
+                    uploaded_by,
+                    change_summary,
+                    status,
+                    is_locked
+                 ) VALUES (
+                    :id,
+                    :document_id,
+                    :version_number,
+                    :file_path,
+                    :file_type,
+                    :uploaded_by,
+                    :change_summary,
+                    :status,
+                    :is_locked
+                 )'
+            );
+
+            $versionStatement->execute([
+                'id' => $versionId,
+                'document_id' => $documentId,
+                'version_number' => $versionNumber,
+                'file_path' => $storedFilePath,
+                'file_type' => $fileType,
+                'uploaded_by' => $uploadedBy,
+                'change_summary' => $changeSummary,
+                'status' => 'draft',
+                'is_locked' => 0,
+            ]);
+
+            $currentVersionStatement = $pdo->prepare(
+                'UPDATE documents
+                 SET current_version_id = :current_version_id
+                 WHERE id = :document_id'
+            );
+            $currentVersionStatement->execute([
+                'current_version_id' => $versionId,
+                'document_id' => $documentId,
+            ]);
+
+            if ($markedForReviewThreadIds !== []) {
+                $statusStatement = $pdo->prepare(
+                    'INSERT INTO review_status (
+                        review_thread_id,
+                        document_version_id,
+                        status,
+                        resolved_by,
+                        resolved_at
+                     ) VALUES (
+                        :review_thread_id,
+                        :document_version_id,
+                        :status,
+                        NULL,
+                        NULL
+                     )
+                     ON DUPLICATE KEY UPDATE
+                        status = VALUES(status),
+                        resolved_by = NULL,
+                        resolved_at = NULL'
+                );
+
+                foreach ($markedForReviewThreadIds as $threadId) {
+                    $statusStatement->execute([
+                        'review_thread_id' => (int) $threadId,
+                        'document_version_id' => $versionId,
+                        'status' => 'marked_for_review',
+                    ]);
+                }
+            }
+
+            $pdo->commit();
+            return $versionNumber;
+        } catch (Throwable $exception) {
+            $pdo->rollBack();
+            throw $exception;
+        }
+    }
+
     /**
      * @return array{id:int,project_id:int,title:string,current_version_id:int,created_at:string,project_role:string}|null
      */
@@ -319,6 +448,62 @@ final class DocumentRepository
     }
 
     /**
+     * @param array<int, int> $threadIds
+     * @return array<int, array{id:int,title:string}>
+     */
+    public function getOpenReviewThreadsByIdsForVersion(
+        int $documentId,
+        int $versionId,
+        int $userId,
+        array $threadIds
+    ): array {
+        if ($threadIds === []) {
+            return [];
+        }
+
+        $placeholders = [];
+        $params = [
+            'document_id' => $documentId,
+            'version_id' => $versionId,
+            'user_id' => $userId,
+        ];
+
+        foreach (array_values($threadIds) as $index => $threadId) {
+            $key = 'thread_id_' . $index;
+            $placeholders[] = ':' . $key;
+            $params[$key] = $threadId;
+        }
+
+        $pdo = Database::connection();
+        $statement = $pdo->prepare(
+            'SELECT rt.id,
+                    rt.title
+             FROM review_threads rt
+             INNER JOIN documents d ON d.id = rt.document_id
+             INNER JOIN user_projects up ON up.project_id = d.project_id
+             LEFT JOIN review_status rs
+                    ON rs.review_thread_id = rt.id
+                   AND rs.document_version_id = :version_id
+             WHERE rt.document_id = :document_id
+               AND rt.id IN (' . implode(', ', $placeholders) . ')
+               AND up.user_id = :user_id
+               AND COALESCE(rs.status, \'open\') = \'open\''
+        );
+
+        $statement->execute($params);
+
+        $threads = [];
+        foreach ($statement->fetchAll(\PDO::FETCH_ASSOC) as $thread) {
+            $threads[(int) $thread['id']] = [
+                'id' => (int) $thread['id'],
+                'title' => (string) $thread['title'],
+            ];
+        }
+
+        return $threads;
+    }
+
+    /**
      * @return array<int, array{id:int,review_thread_id:int,document_version_id:int,version_number:int,reviewer_id:int,reviewer_name:string|null,page_number:int,comment:string,created_at:string}>
      */
     public function getReviewCommentsForDocumentForUser(int $projectId, int $documentId, int $userId): array
@@ -387,6 +572,145 @@ final class DocumentRepository
         }
 
         return $map;
+    }
+
+    public function documentHasApprovedVersion(int $documentId): bool
+    {
+        $pdo = Database::connection();
+        $statement = $pdo->prepare(
+            'SELECT COUNT(*)
+             FROM document_versions
+             WHERE document_id = :document_id
+               AND status = \'approved\''
+        );
+        $statement->execute(['document_id' => $documentId]);
+
+        return (int) $statement->fetchColumn() > 0;
+    }
+
+    public function hasNewerVersion(int $documentId, int $versionNumber): bool
+    {
+        $pdo = Database::connection();
+        $statement = $pdo->prepare(
+            'SELECT COUNT(*)
+             FROM document_versions
+             WHERE document_id = :document_id
+               AND version_number > :version_number'
+        );
+        $statement->execute([
+            'document_id' => $documentId,
+            'version_number' => $versionNumber,
+        ]);
+
+        return (int) $statement->fetchColumn() > 0;
+    }
+
+    public function hasUnresolvedReviewThreadsForVersion(int $documentId, int $versionId): bool
+    {
+        $pdo = Database::connection();
+        $statement = $pdo->prepare(
+            'SELECT COUNT(*)
+             FROM review_threads rt
+             LEFT JOIN review_status rs
+                    ON rs.review_thread_id = rt.id
+                   AND rs.document_version_id = :version_id
+             WHERE rt.document_id = :document_id
+               AND COALESCE(rs.status, \'open\') <> \'resolved\''
+        );
+        $statement->execute([
+            'document_id' => $documentId,
+            'version_id' => $versionId,
+        ]);
+
+        return (int) $statement->fetchColumn() > 0;
+    }
+
+    public function approveDocumentVersion(int $documentId, int $versionId): bool
+    {
+        $pdo = Database::connection();
+        $pdo->beginTransaction();
+
+        try {
+            $versionStatement = $pdo->prepare(
+                'SELECT id, version_number
+                 FROM document_versions
+                 WHERE id = :version_id
+                   AND document_id = :document_id
+                 LIMIT 1
+                 FOR UPDATE'
+            );
+            $versionStatement->execute([
+                'document_id' => $documentId,
+                'version_id' => $versionId,
+            ]);
+            $version = $versionStatement->fetch(\PDO::FETCH_ASSOC);
+            if (!$version) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $approvedStatement = $pdo->prepare(
+                'SELECT COUNT(*)
+                 FROM document_versions
+                 WHERE document_id = :document_id
+                   AND status = \'approved\''
+            );
+            $approvedStatement->execute(['document_id' => $documentId]);
+            if ((int) $approvedStatement->fetchColumn() > 0) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $newerStatement = $pdo->prepare(
+                'SELECT COUNT(*)
+                 FROM document_versions
+                 WHERE document_id = :document_id
+                   AND version_number > :version_number'
+            );
+            $newerStatement->execute([
+                'document_id' => $documentId,
+                'version_number' => (int) $version['version_number'],
+            ]);
+            if ((int) $newerStatement->fetchColumn() > 0) {
+                $pdo->rollBack();
+                return false;
+            }
+
+            $documentStatement = $pdo->prepare(
+                'UPDATE documents
+                 SET current_version_id = :version_id
+                 WHERE id = :document_id'
+            );
+            $documentStatement->execute([
+                'document_id' => $documentId,
+                'version_id' => $versionId,
+            ]);
+
+            $lockVersionsStatement = $pdo->prepare(
+                'UPDATE document_versions
+                 SET is_locked = 1
+                 WHERE document_id = :document_id'
+            );
+            $lockVersionsStatement->execute(['document_id' => $documentId]);
+
+            $approveStatement = $pdo->prepare(
+                'UPDATE document_versions
+                 SET status = \'approved\',
+                     is_locked = 1
+                 WHERE id = :version_id
+                   AND document_id = :document_id'
+            );
+            $approveStatement->execute([
+                'document_id' => $documentId,
+                'version_id' => $versionId,
+            ]);
+
+            $pdo->commit();
+            return $approveStatement->rowCount() > 0;
+        } catch (Throwable $exception) {
+            $pdo->rollBack();
+            throw $exception;
+        }
     }
 
     /** @return array{id:int,document_id:int,created_by:int,title:string}|null */

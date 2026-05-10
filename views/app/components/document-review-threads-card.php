@@ -1,19 +1,22 @@
 <?php
-/** @var array{id:int,project_id:int,title:string,current_version_id:int,created_at:string,project_role:string} $document */
+/** @var array{id:int,project_id:int,title:string,current_version_id:int,created_at:string,project_role:string,is_approved?:bool,approved_version_number?:int|null} $document */
 /** @var array{id:int,document_id:int,version_number:int,file_path:string,file_type:string,uploaded_by:int,uploaded_by_name:string|null,change_summary:string|null,status:string|null,is_locked:int,created_at:string} $selectedVersion */
 /** @var array<int, array{id:int,document_id:int,version_number:int,file_path:string,file_type:string,uploaded_by:int,uploaded_by_name:string|null,change_summary:string|null,status:string|null,is_locked:int,created_at:string}> $versions */
 /** @var array<int, array{id:int,title:string,created_by:int,created_by_name:string|null,created_at:string,status:string,selected_version_status:string,open_version_numbers:array<int,int>,comments:array<int, array{id:int,review_thread_id:int,document_version_id:int,version_number:int,reviewer_id:int,reviewer_name:string|null,page_number:int,comment:string,created_at:string}>}> $threads */
 
 $openThreadCount = 0;
 foreach ($threads as $thread) {
-    if ((string)$thread['status'] === 'open') {
+    if ((string)$thread['selected_version_status'] === 'open') {
         $openThreadCount++;
     }
 }
 
-$canCreateThread = in_array((string)$document['project_role'], ['owner', 'reviewer'], true);
-$canComment = in_array((string)$document['project_role'], ['owner', 'editor', 'reviewer'], true);
-$canResolve = in_array((string)$document['project_role'], ['owner', 'reviewer'], true);
+$isApprovedDocument = (bool) ($document['is_approved'] ?? false);
+$isSelectedVersionLocked = (int) ($selectedVersion['is_locked'] ?? 0) === 1 || (string) ($selectedVersion['status'] ?? '') === 'approved';
+$isViewOnly = $isApprovedDocument || $isSelectedVersionLocked;
+$canCreateThread = !$isViewOnly && in_array((string)$document['project_role'], [ 'reviewer'], true);
+$canComment = !$isViewOnly && in_array((string)$document['project_role'], ['owner', 'editor', 'reviewer'], true);
+$canResolve = !$isViewOnly && in_array((string)$document['project_role'], [ 'reviewer'], true);
 $createThreadUrl = url('/app/projects/' . (int)$document['project_id'] . '/' . (int)$document['id'] . '/threads');
 $commentUrlTemplate = url('/app/projects/' . (int)$document['project_id'] . '/' . (int)$document['id'] . '/threads/__THREAD_ID__/comments');
 $resolveUrlTemplate = url('/app/projects/' . (int)$document['project_id'] . '/' . (int)$document['id'] . '/threads/__THREAD_ID__/resolve');
@@ -104,6 +107,7 @@ $resolveUrlTemplate = url('/app/projects/' . (int)$document['project_id'] . '/' 
                     data-thread-status-select="1">
                 <option value="all">All threads</option>
                 <option value="open">Open</option>
+                <option value="marked_for_review">Marked for review</option>
                 <option value="resolved">Resolved</option>
             </select>
         </div>
@@ -118,7 +122,7 @@ $resolveUrlTemplate = url('/app/projects/' . (int)$document['project_id'] . '/' 
                 <article class="thread-item"
                          data-thread-item="1"
                          data-thread-id="<?= e((string)$thread['id']) ?>"
-                         data-thread-status="<?= e((string)$thread['status']) ?>">
+                         data-thread-status="<?= e((string)$thread['selected_version_status']) ?>">
                     <button type="button"
                             class="thread-item-trigger"
                             data-thread-open-btn="<?= e((string)$thread['id']) ?>"
@@ -127,8 +131,8 @@ $resolveUrlTemplate = url('/app/projects/' . (int)$document['project_id'] . '/' 
                             data-thread-created-by="<?= e((string)($thread['created_by_name'] ?? 'Unknown')) ?>">
                         <span class="thread-item-header">
                             <span class="thread-item-title"><?= e((string)$thread['title']) ?></span>
-                            <span class="project-document-chip chip-status status-<?= e((string)$thread['status']) ?>">
-                                <?= e((string)$thread['status']) ?>
+                            <span class="project-document-chip chip-status status-<?= e((string)$thread['selected_version_status']) ?>">
+                                <?= e(str_replace('_', ' ', (string)$thread['selected_version_status'])) ?>
                             </span>
                         </span>
                         <span class="thread-item-footer">

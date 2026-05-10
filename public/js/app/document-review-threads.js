@@ -91,8 +91,8 @@
     function setModeHeaderDetail(status, creator) {
         if (modeStatus) {
             var normalized = (status || 'open').toLowerCase();
-            modeStatus.textContent = normalized;
-            modeStatus.classList.remove('hidden', 'status-open', 'status-resolved', 'status-draft');
+            modeStatus.textContent = normalized.replace(/_/g, ' ');
+            modeStatus.classList.remove('hidden', 'status-open', 'status-resolved', 'status-marked_for_review', 'status-draft');
             modeStatus.classList.add('status-' + normalized);
         }
 
@@ -105,7 +105,7 @@
     function clearModeHeaderDetail() {
         if (modeStatus) {
             modeStatus.classList.add('hidden');
-            modeStatus.classList.remove('status-open', 'status-resolved', 'status-draft');
+            modeStatus.classList.remove('status-open', 'status-resolved', 'status-marked_for_review', 'status-draft');
         }
 
         if (modeMeta) {

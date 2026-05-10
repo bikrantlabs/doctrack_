@@ -1,6 +1,7 @@
 <?php
 /** @var array{id:int, title:string, description:string|null, role:string, created_at:string, documentCount:int, memberCount:int} $project */
 /** @var array<int, array{id:int,title:string,current_version_id:int,version_number:int,file_type:string,status:string,is_locked:int,uploaded_by_name:string|null,created_at:string}> $documents */
+
 ?>
 
 <section class="project-documents-card">
@@ -20,7 +21,7 @@
                 $status = (string) $document['status'];
                 $versionNumber = (int) $document['version_number'];
                 ?>
-                <a class="project-document-link" href="<?= e(url('/app/projects/' . (int) $project['id'] . '/' . (int) $document['id'])) ?>">
+                <a class="project-document-link" href="<?= e(url('/app/projects/' . (int) $project['id'] . '/' . (int) $document['id'] . "?version=" . $document["version_number"] )) ?>">
                     <article class="project-document-card">
                     <div class="project-document-card-header">
                         <div class="project-document-icon" aria-hidden="true">

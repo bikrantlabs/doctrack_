@@ -24,6 +24,12 @@ abstract class Controller
         $_SESSION['_flash'][$type] = $message;
     }
 
+    protected function notFound(): void
+    {
+        http_response_code(404);
+        View::render('not-found', [], 'Page not found');
+    }
+
     /** @param array<string, string> $data */
     protected function keepOld(array $data): void
     {
