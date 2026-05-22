@@ -37,7 +37,7 @@
         }
 
         pdfjsLib.GlobalWorkerOptions.workerSrc =
-            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+            root.getAttribute('data-worker-src') || '/js/libraries/pdf.worker.min.mjs';
 
         pdfjsLib.getDocument(fileUrl).promise
             .then(function (pdfDoc) {

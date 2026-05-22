@@ -7,7 +7,8 @@ $fileUrl = url('/app/documents/file/' . (int)$selectedVersion['id']);
 <section class="document-viewer-pane"
          data-document-viewer="1"
          data-file-url="<?= e($fileUrl) ?>"
-         data-file-type="<?= e((string)$selectedVersion['file_type']) ?>">
+         data-file-type="<?= e((string)$selectedVersion['file_type']) ?>"
+         data-worker-src="<?= e(url('/js/libraries/pdf.worker.min.mjs')) ?>">
     <header class="document-viewer-header">
         <div class="document-viewer-title-block">
             <h1 class="document-viewer-title"><?= e((string)$document['title']) ?></h1>
