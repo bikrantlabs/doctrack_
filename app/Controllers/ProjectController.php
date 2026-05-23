@@ -7,20 +7,26 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Controller;
 use App\Repositories\DocumentRepository;
+use App\Repositories\NotificationRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\UserRepository;
 use App\Services\DocumentService;
+use App\Services\NotificationService;
 use App\Services\ProjectService;
 
 final class ProjectController extends Controller
 {
     private ProjectService $projectService;
     private DocumentService $documentService;
+    private NotificationService $notificationService;
 
     public function __construct()
     {
-        $this->projectService = new ProjectService(new ProjectRepository(), new UserRepository());
-        $this->documentService = new DocumentService(new DocumentRepository(), new ProjectRepository());
+        $notificationRepo = new NotificationRepository();
+        $projectRepo = new ProjectRepository();
+        $this->projectService = new ProjectService($projectRepo, new UserRepository(), $notificationRepo);
+        $this->documentService = new DocumentService(new DocumentRepository(), $projectRepo, $notificationRepo);
+        $this->notificationService = new NotificationService($notificationRepo, $projectRepo);
     }
 
     public function searchUsers(): void
@@ -444,6 +450,51 @@ final class ProjectController extends Controller
         $result = $this->projectService->declineInvitation((int) $user['id'], (int) $invitationId);
         $statusCode = $result['ok'] ? 200 : 422;
         $this->json($result, $statusCode);
+    }
+
+    public function getNotifications(): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $notifications = $this->notificationService->fetchNotifications((int) $user['id']);
+        $unreadCount = $this->notificationService->getUnreadCount((int) $user['id']);
+
+        $this->json([
+            'ok' => true,
+            'notifications' => $notifications,
+            'unreadCount' => $unreadCount,
+        ]);
+    }
+
+    public function markNotificationRead(string $notificationId): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $updated = $this->notificationService->markAsRead((int) $notificationId, (int) $user['id']);
+        $this->json([
+            'ok' => $updated,
+            'message' => $updated ? 'Notification marked as read.' : 'Notification not found.',
+        ]);
+    }
+
+    public function markAllNotificationsRead(): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            $this->json(['ok' => false, 'message' => 'Unauthorized'], 401);
+            return;
+        }
+
+        $this->notificationService->markAllAsRead((int) $user['id']);
+        $this->json(['ok' => true, 'message' => 'All notifications marked as read.']);
     }
 
     /** @return array<string, mixed> */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Repositories\NotificationRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\UserRepository;
 
@@ -14,8 +15,9 @@ final class ProjectService
     private const ALLOWED_SCOPES = ['all', 'my', 'shared'];
 
     public function __construct(
-        private readonly ProjectRepository $projects,
-        private readonly UserRepository $users
+        private readonly ProjectRepository     $projects,
+        private readonly UserRepository        $users,
+        private readonly NotificationRepository $notifications
     ) {
     }
 
@@ -197,6 +199,20 @@ final class ProjectService
         $updated = $this->projects->updateMemberRole($projectId, $memberUserId, $normalizedRole);
         if (!$updated) {
             return ['ok' => false, 'message' => 'Could not update member role.'];
+        }
+
+        $project = $this->projects->getProjectDetailForUser($projectId, $actingUserId);
+        $projectTitle = $project !== null ? (string) $project['title'] : '';
+        if ($projectTitle !== '') {
+            $this->notifications->create(
+                $memberUserId,
+                $projectId,
+                'member_role_changed',
+                "Role updated in '{$projectTitle}'",
+                "Your role changed to {$normalizedRole}",
+                '/app/projects/' . $projectId,
+                $actingUserId
+            );
         }
 
         return ['ok' => true, 'message' => 'Member role updated successfully.'];

@@ -3,6 +3,8 @@ $currentUrl = current_path();
 $activeScope = isset($activeScope) ? (string) $activeScope : 'all';
 $pendingInvitationCount = isset($pendingInvitationCount) ? (int) $pendingInvitationCount : 0;
 $pendingInvitations = isset($pendingInvitations) ? (array) $pendingInvitations : [];
+$notifications = isset($notifications) ? (array) $notifications : [];
+$notificationUnreadCount = isset($notificationUnreadCount) ? (int) $notificationUnreadCount : 0;
 $scopeTabs = [
     'all' => 'All Projects',
     'my' => 'My Projects',
@@ -136,5 +138,5 @@ $scopeSubtitle = [
 
 <?php require BASE_PATH . '/views/app/modals/create-new-project.php'; ?>
 <script src="<?= e(url('/js/app/projects.js')) ?>" defer></script>
-<script src="<?= e(url('/js/app/invitations.js')) ?>" defer></script>
+<script src="<?= e(url('/js/app/notifications.js')) ?>" defer></script>
 

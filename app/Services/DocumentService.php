@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Repositories\DocumentRepository;
+use App\Repositories\NotificationRepository;
 use App\Repositories\ProjectRepository;
 use Throwable;
 
@@ -18,8 +19,9 @@ final class DocumentService
     private const ALLOWED_APPROVER_ROLES = ['reviewer'];
 
     public function __construct(
-        private readonly DocumentRepository $documents,
-        private readonly ProjectRepository  $projects
+        private readonly DocumentRepository     $documents,
+        private readonly ProjectRepository      $projects,
+        private readonly NotificationRepository $notifications
     )
     {
     }
@@ -119,6 +121,36 @@ final class DocumentService
     private function generateId()
     {
         return random_int(1, 1000);
+    }
+
+    private function notifyProjectMembersExcludingActor(
+        int $projectId,
+        int $actorUserId,
+        string $type,
+        string $title,
+        ?string $body,
+        ?string $link
+    ): void {
+        $members = $this->projects->getProjectMembersForUser($projectId, $actorUserId);
+        $recipientIds = [];
+        foreach ($members as $member) {
+            $memberId = (int) $member['id'];
+            if ($memberId !== $actorUserId) {
+                $recipientIds[] = $memberId;
+            }
+        }
+
+        if ($recipientIds !== []) {
+            $this->notifications->createForMultipleUsers(
+                $recipientIds,
+                $projectId,
+                $type,
+                $title,
+                $body,
+                $link,
+                $actorUserId
+            );
+        }
     }
 
     /** @return array{ok:bool,message:string,versionNumber?:int} */
@@ -236,6 +268,18 @@ final class DocumentService
             }
 
             return ['ok' => false, 'message' => 'Could not create new document version.'];
+        }
+
+        $documentTitle = (string) ($document['title'] ?? '');
+        if ($documentTitle !== '') {
+            $this->notifyProjectMembersExcludingActor(
+                $projectId,
+                $actorUserId,
+                'version_uploaded',
+                "New version v{$versionNumber} of '{$documentTitle}'",
+                null,
+                '/app/projects/' . $projectId . '/' . $documentId . '?version=' . $versionNumber
+            );
         }
 
         return [
@@ -446,6 +490,18 @@ final class DocumentService
             return ['ok' => false, 'message' => 'Could not create review thread.'];
         }
 
+        $documentTitle = (string) ($document['title'] ?? '');
+        if ($documentTitle !== '') {
+            $this->notifyProjectMembersExcludingActor(
+                $projectId,
+                $actorUserId,
+                'thread_created',
+                "New review thread on '{$documentTitle}'",
+                $normalizedTitle,
+                '/app/projects/' . $projectId . '/' . $documentId
+            );
+        }
+
         return ['ok' => true, 'message' => 'Review thread created.'];
     }
 
@@ -510,6 +566,18 @@ final class DocumentService
             return ['ok' => false, 'message' => 'Could not add comment.'];
         }
 
+        $threadTitle = (string) ($thread['title'] ?? '');
+        if ($threadTitle !== '') {
+            $this->notifyProjectMembersExcludingActor(
+                $projectId,
+                $actorUserId,
+                'comment_added',
+                "New comment on '{$threadTitle}'",
+                null,
+                '/app/projects/' . $projectId . '/' . $documentId
+            );
+        }
+
         return ['ok' => true, 'message' => 'Comment added.'];
     }
 
@@ -549,6 +617,18 @@ final class DocumentService
             $this->documents->resolveReviewThreadForVersion($threadId, $versionId, $actorUserId);
         } catch (Throwable $exception) {
             return ['ok' => false, 'message' => 'Could not resolve thread.'];
+        }
+
+        $threadTitle = (string) ($thread['title'] ?? '');
+        if ($threadTitle !== '') {
+            $this->notifyProjectMembersExcludingActor(
+                $projectId,
+                $actorUserId,
+                'thread_resolved',
+                "Thread '{$threadTitle}' resolved",
+                null,
+                '/app/projects/' . $projectId . '/' . $documentId
+            );
         }
 
         return ['ok' => true, 'message' => 'Thread marked as resolved.'];
@@ -603,6 +683,18 @@ final class DocumentService
 
         if (!$approved) {
             return ['ok' => false, 'message' => 'Could not approve document version.'];
+        }
+
+        $documentTitle = (string) ($document['title'] ?? '');
+        if ($documentTitle !== '') {
+            $this->notifyProjectMembersExcludingActor(
+                $projectId,
+                $actorUserId,
+                'version_approved',
+                "Version v{$version['version_number']} of '{$documentTitle}' approved",
+                null,
+                '/app/projects/' . $projectId . '/' . $documentId
+            );
         }
 
         return ['ok' => true, 'message' => 'Document version approved.'];

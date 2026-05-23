@@ -19,6 +19,10 @@ $showSearch = isset($showSearch) ? (bool)$showSearch : false;
 $showNotifications = isset($showNotifications) ? (bool)$showNotifications : false;
 $pendingInvitationCount = isset($pendingInvitationCount) ? (int)$pendingInvitationCount : 0;
 $pendingInvitations = isset($pendingInvitations) ? (array)$pendingInvitations : [];
+$notifications = isset($notifications) ? (array)$notifications : [];
+$notificationUnreadCount = isset($notificationUnreadCount) ? (int)$notificationUnreadCount : 0;
+
+$badgeCount = $notificationUnreadCount + $pendingInvitationCount;
 ?>
 
 <header class="dashboard-header">
@@ -72,8 +76,8 @@ $pendingInvitations = isset($pendingInvitations) ? (array)$pendingInvitations : 
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
-                    <?php if ($pendingInvitationCount > 0): ?>
-                        <span class="notification-badge"><?= min($pendingInvitationCount, 9) ?><?= $pendingInvitationCount > 9 ? '+' : '' ?></span>
+                    <?php if ($badgeCount > 0): ?>
+                        <span class="notification-badge"><?= min($badgeCount, 9) ?><?= $badgeCount > 9 ? '+' : '' ?></span>
                     <?php endif; ?>
                 </button>
                 <?php require BASE_PATH . '/views/app/components/notifications-dropdown.php'; ?>

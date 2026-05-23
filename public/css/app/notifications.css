@@ -1,0 +1,261 @@
+/* ============================================
+   NOTIFICATIONS.CSS - Notifications & Invitations
+   ============================================ */
+
+/* Notifications Wrapper */
+.notifications-wrapper {
+    position: relative;
+}
+
+/* Notifications Trigger Button */
+.notifications-trigger {
+    position: relative;
+}
+
+.notification-badge {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    background-color: var(--color-error);
+    color: white;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-bold);
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+}
+
+/* Notifications Dropdown */
+.notifications-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: var(--spacing-sm);
+    width: 400px;
+    max-height: 520px;
+    background-color: var(--color-bg-card);
+    border: var(--border-width-thin) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    z-index: var(--z-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px) scale(0.95);
+    transition: all var(--transition-fast);
+    pointer-events: none;
+}
+
+.notifications-dropdown.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* Notifications List */
+.notifications-list {
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+/* Section Label */
+.notifications-section-label {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background-color: var(--color-bg-subtle);
+    border-bottom: var(--border-width-thin) solid var(--color-border);
+}
+
+/* Divider between sections */
+.notifications-divider {
+    height: 1px;
+    background-color: var(--color-border);
+    margin: 0;
+}
+
+/* Notification Item - Base */
+.notification-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: var(--border-width-thin) solid var(--color-border);
+    transition: background-color var(--transition-fast);
+    text-decoration: none;
+    color: inherit;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background-color: var(--color-bg-hover);
+}
+
+/* Invitation Item */
+.invitation-item {
+    cursor: default;
+}
+
+/* General notification items are clickable links */
+.notification-item:not(.invitation-item) {
+    cursor: pointer;
+}
+
+.notification-item:not(.invitation-item):hover {
+    background-color: var(--color-bg-hover);
+}
+
+/* Unread notification */
+.notification-item.notification-unread {
+    background-color: var(--color-bg-active);
+    border-left: 3px solid var(--color-primary);
+}
+
+.notification-item.notification-unread:hover {
+    background-color: var(--color-bg-hover);
+}
+
+/* Notification Content */
+.notification-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+    flex-wrap: wrap;
+}
+
+.notification-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.notification-body {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    margin: var(--spacing-xs) 0 0 0;
+    line-height: 1.3;
+}
+
+.notification-meta {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    margin: var(--spacing-xs) 0 0 0;
+}
+
+.notification-meta strong {
+    color: var(--color-text-primary);
+}
+
+/* Invitation Role Badge */
+.invitation-role {
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Invitation Actions */
+.invitation-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+}
+
+.invitation-accept-btn,
+.invitation-decline-btn {
+    white-space: nowrap;
+}
+
+/* Unread Dot */
+.notification-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-primary);
+    flex-shrink: 0;
+    margin-top: 6px;
+}
+
+/* Notifications Empty State */
+.notifications-empty {
+    padding: var(--spacing-lg);
+    text-align: center;
+    color: var(--color-text-muted);
+}
+
+.notifications-empty p {
+    margin: 0;
+    font-size: var(--font-size-sm);
+}
+
+/* Notifications Footer */
+.notifications-footer {
+    border-top: var(--border-width-thin) solid var(--color-border);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    text-align: center;
+}
+
+.mark-all-read-btn {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.mark-all-read-btn:hover {
+    background-color: var(--color-bg-hover);
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .notifications-dropdown {
+        width: calc(100vw - var(--spacing-lg) * 2);
+        max-width: 400px;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%) translateY(-8px) scale(0.95);
+    }
+
+    .notifications-dropdown.active {
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .invitation-item {
+        flex-direction: column;
+    }
+
+    .invitation-actions {
+        width: 100%;
+    }
+
+    .invitation-accept-btn,
+    .invitation-decline-btn {
+        flex: 1;
+    }
+}

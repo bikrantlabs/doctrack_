@@ -54,6 +54,9 @@ $router->post('/app/projects/{projectId}/{documentId}/versions', [ProjectControl
 $router->post('/app/projects/{projectId}/{documentId}/approve', [ProjectController::class, 'approveDocumentVersion']);
 $router->post('/app/projects/{projectId}/members/{memberUserId}/role', [ProjectController::class, 'updateMemberRole']);
 $router->post('/app/projects/{projectId}/members/{memberUserId}/remove', [ProjectController::class, 'removeMember']);
+$router->get('/app/notifications', [ProjectController::class, 'getNotifications']);
+$router->post('/app/notifications/{notificationId}/read', [ProjectController::class, 'markNotificationRead']);
+$router->post('/app/notifications/read-all', [ProjectController::class, 'markAllNotificationsRead']);
 $router->get('/app/invitations', [ProjectController::class, 'getInvitations']);
 $router->post('/app/invitations/{invitationId}/accept', [ProjectController::class, 'acceptInvitation']);
 $router->post('/app/invitations/{invitationId}/decline', [ProjectController::class, 'declineInvitation']);

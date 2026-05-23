@@ -128,3 +128,24 @@ CREATE TABLE project_invitations
 
     created_at      TIMESTAMP                                         DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE notifications
+(
+    id          INT AUTO_INCREMENT PRIMARY KEY,
+    user_id     INT          NOT NULL,
+    project_id  INT          NULL,
+    type        VARCHAR(50)  NOT NULL,
+    title       VARCHAR(255) NOT NULL,
+    body        TEXT,
+    link        VARCHAR(500),
+    created_by  INT          NULL,
+    is_read     TINYINT(1) DEFAULT 0,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (project_id) REFERENCES projects (id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES users (id) ON DELETE SET NULL,
+
+    INDEX idx_user_read (user_id, is_read),
+    INDEX idx_user_created (user_id, created_at DESC)
+);
