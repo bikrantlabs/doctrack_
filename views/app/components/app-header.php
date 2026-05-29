@@ -15,8 +15,8 @@ if (count($nameParts) >= 2) {
 }
 
 $breadcrumbs = isset($breadcrumbs) && is_array($breadcrumbs) ? $breadcrumbs : [];
-$showSearch = isset($showSearch) ? (bool)$showSearch : false;
-$showNotifications = isset($showNotifications) ? (bool)$showNotifications : false;
+$showSearch = false;
+$showNotifications = true;
 $pendingInvitationCount = isset($pendingInvitationCount) ? (int)$pendingInvitationCount : 0;
 $pendingInvitations = isset($pendingInvitations) ? (array)$pendingInvitations : [];
 $notifications = isset($notifications) ? (array)$notifications : [];
@@ -96,3 +96,5 @@ $badgeCount = $notificationUnreadCount + $pendingInvitationCount;
         <a href="<?= e(url('/logout')) ?>" class="btn btn-primary btn-sm">Logout</a>
     </div>
 </header>
+<script src="<?= e(url('/js/app/projects.js')) ?>" defer></script>
+<script src="<?= e(url('/js/app/notifications.js')) ?>" defer></script>

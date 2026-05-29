@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Models;
 
 use App\Repositories\DocumentRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\ProjectRepository;
 use Throwable;
 
-final class DocumentService
+final class DocumentModel
 {
     private const MAX_UPLOAD_SIZE_BYTES = 26214400; // 25MB
     private const ALLOWED_UPLOAD_ROLES = ['owner', 'editor'];
@@ -746,4 +746,3 @@ final class DocumentService
         ];
     }
 }
-

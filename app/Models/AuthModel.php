@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Models;
 
 use App\Exceptions\DuplicateEmailException;
 use App\Repositories\UserRepository;
 
-final class AuthService
+final class AuthModel
 {
     public function __construct(private readonly UserRepository $users)
     {
@@ -79,4 +79,3 @@ final class AuthService
         ];
     }
 }
-

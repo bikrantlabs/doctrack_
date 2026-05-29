@@ -6,16 +6,16 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Models\AuthModel;
 use App\Repositories\UserRepository;
-use App\Services\AuthService;
 
 final class AuthController extends Controller
 {
-    private AuthService $authService;
+    private AuthModel $authModel;
 
     public function __construct()
     {
-        $this->authService = new AuthService(new UserRepository());
+        $this->authModel = new AuthModel(new UserRepository());
     }
 
     public function showLogin(): void
@@ -43,7 +43,7 @@ final class AuthController extends Controller
 
         $this->keepOld(['email' => $email]);
 
-        $result = $this->authService->login($email, $password);
+        $result = $this->authModel->login($email, $password);
         if (!$result['ok']) {
             $this->flash('error', $result['message']);
             $this->redirect('/login');
@@ -72,7 +72,7 @@ final class AuthController extends Controller
             'email' => $email,
         ]);
 
-        $result = $this->authService->register([
+        $result = $this->authModel->register([
             'fullname' => $fullname,
             'firstName' => $firstName,
             'lastName' => $lastName,

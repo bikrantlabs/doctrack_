@@ -42,14 +42,7 @@ $scopeSubtitle = [
                     <p class="page-subtitle"><?= e($scopeSubtitle[$activeScope] ?? $scopeSubtitle['all']) ?></p>
                 </div>
                 <div class="page-header-right">
-                    <button class="btn btn-outline">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                            <polyline points="17 8 12 3 7 8"/>
-                            <line x1="12" y1="3" x2="12" y2="15"/>
-                        </svg>
-                        Import
-                    </button>
+                   
                     <button class="btn btn-primary" data-modal="create-project-modal">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <line x1="12" y1="5" x2="12" y2="19"/>
@@ -75,34 +68,7 @@ $scopeSubtitle = [
                         <?php endforeach; ?>
                     </div>
                 </div>
-                <div class="filters-right">
-                    <div class="view-toggle">
-                        <button class="view-btn active" aria-label="Grid view">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="7" height="7"/>
-                                <rect x="14" y="3" width="7" height="7"/>
-                                <rect x="14" y="14" width="7" height="7"/>
-                                <rect x="3" y="14" width="7" height="7"/>
-                            </svg>
-                        </button>
-                        <button class="view-btn" aria-label="List view">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="8" y1="6" x2="21" y2="6"/>
-                                <line x1="8" y1="12" x2="21" y2="12"/>
-                                <line x1="8" y1="18" x2="21" y2="18"/>
-                                <line x1="3" y1="6" x2="3.01" y2="6"/>
-                                <line x1="3" y1="12" x2="3.01" y2="12"/>
-                                <line x1="3" y1="18" x2="3.01" y2="18"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <select class="filter-select" aria-label="Sort projects">
-                        <option>Sort by: Recent</option>
-                        <option>Sort by: Name</option>
-                        <option>Sort by: Documents</option>
-                        <option>Sort by: Members</option>
-                    </select>
-                </div>
+                
             </div>
 
             <!-- Projects Grid -->
@@ -137,6 +103,4 @@ $scopeSubtitle = [
 </div>
 
 <?php require BASE_PATH . '/views/app/modals/create-new-project.php'; ?>
-<script src="<?= e(url('/js/app/projects.js')) ?>" defer></script>
-<script src="<?= e(url('/js/app/notifications.js')) ?>" defer></script>
 

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Models;
 
 use App\Repositories\NotificationRepository;
 use App\Repositories\ProjectRepository;
 
-final class NotificationService
+final class NotificationModel
 {
     public function __construct(
         private readonly NotificationRepository $notifications,

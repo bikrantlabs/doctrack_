@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Services;
+namespace App\Models;
 
+use App\Repositories\InvitationRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\UserRepository;
 
-final class ProjectService
+final class ProjectModel
 {
     private const ALLOWED_MEMBER_ROLES = ['reviewer', 'editor', 'viewer'];
     private const MANAGEABLE_MEMBER_ROLES = ['reviewer', 'editor', 'viewer'];
@@ -330,7 +331,7 @@ final class ProjectService
             return [];
         }
 
-        return (new \App\Repositories\InvitationRepository())->getPendingInvitationsForUser($userId);
+        return (new InvitationRepository())->getPendingInvitationsForUser($userId);
     }
 
     /**
@@ -342,7 +343,7 @@ final class ProjectService
             return 0;
         }
 
-        return (new \App\Repositories\InvitationRepository())->getPendingInvitationCount($userId);
+        return (new InvitationRepository())->getPendingInvitationCount($userId);
     }
 
     /** @return array{ok:bool,message:string} */
@@ -352,7 +353,7 @@ final class ProjectService
             return ['ok' => false, 'message' => 'Invalid request.'];
         }
 
-        $invitationRepo = new \App\Repositories\InvitationRepository();
+        $invitationRepo = new InvitationRepository();
         $invitation = $invitationRepo->getInvitationById($invitationId);
 
         if ($invitation === null) {
@@ -390,7 +391,7 @@ final class ProjectService
             return ['ok' => false, 'message' => 'Invalid request.'];
         }
 
-        $invitationRepo = new \App\Repositories\InvitationRepository();
+        $invitationRepo = new InvitationRepository();
         $invitation = $invitationRepo->getInvitationById($invitationId);
 
         if ($invitation === null) {

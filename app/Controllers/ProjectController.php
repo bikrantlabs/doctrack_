@@ -6,27 +6,27 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Core\Controller;
+use App\Models\DocumentModel;
+use App\Models\NotificationModel;
+use App\Models\ProjectModel;
 use App\Repositories\DocumentRepository;
 use App\Repositories\NotificationRepository;
 use App\Repositories\ProjectRepository;
 use App\Repositories\UserRepository;
-use App\Services\DocumentService;
-use App\Services\NotificationService;
-use App\Services\ProjectService;
 
 final class ProjectController extends Controller
 {
-    private ProjectService $projectService;
-    private DocumentService $documentService;
-    private NotificationService $notificationService;
+    private ProjectModel $projectModel;
+    private DocumentModel $documentModel;
+    private NotificationModel $notificationModel;
 
     public function __construct()
     {
         $notificationRepo = new NotificationRepository();
         $projectRepo = new ProjectRepository();
-        $this->projectService = new ProjectService($projectRepo, new UserRepository(), $notificationRepo);
-        $this->documentService = new DocumentService(new DocumentRepository(), $projectRepo, $notificationRepo);
-        $this->notificationService = new NotificationService($notificationRepo, $projectRepo);
+        $this->projectModel = new ProjectModel($projectRepo, new UserRepository(), $notificationRepo);
+        $this->documentModel = new DocumentModel(new DocumentRepository(), $projectRepo, $notificationRepo);
+        $this->notificationModel = new NotificationModel($notificationRepo, $projectRepo);
     }
 
     public function searchUsers(): void
@@ -38,7 +38,7 @@ final class ProjectController extends Controller
         }
 
         $query = trim((string) ($_GET['q'] ?? ''));
-        $users = $this->projectService->searchUsers($query, (int) $user['id']);
+        $users = $this->projectModel->searchUsers($query, (int) $user['id']);
 
         $this->json(['ok' => true, 'users' => $users]);
     }
@@ -61,7 +61,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $result = $this->projectService->createProject((int) $user['id'], $title, $description, $members);
+        $result = $this->projectModel->createProject((int) $user['id'], $title, $description, $members);
 
         if (!$result['ok']) {
             $this->json($result, 422);
@@ -80,7 +80,7 @@ final class ProjectController extends Controller
             $this->redirect('/login');
         }
 
-        $result = $this->projectService->deleteProject((int) $projectId, (int) $user['id']);
+        $result = $this->projectModel->deleteProject((int) $projectId, (int) $user['id']);
         $this->flash($result['ok'] ? 'success' : 'error', $result['message']);
         $this->redirect('/app');
     }
@@ -99,20 +99,28 @@ final class ProjectController extends Controller
             return;
         }
 
-        $project = $this->projectService->fetchProjectDetailForUser($id, (int) $user['id']);
+        $project = $this->projectModel->fetchProjectDetailForUser($id, (int) $user['id']);
         if ($project === null) {
             $this->notFound();
             return;
         }
 
-        $members = $this->projectService->fetchProjectMembersForUser($id, (int) $user['id']);
-        $documents = $this->documentService->fetchProjectDocumentsForUser($id, (int) $user['id']);
+        $members = $this->projectModel->fetchProjectMembersForUser($id, (int) $user['id']);
+        $documents = $this->documentModel->fetchProjectDocumentsForUser($id, (int) $user['id']);
+        $notifications = $this->notificationModel->fetchNotifications((int) $user['id']);
+        $notificationUnreadCount = $this->notificationModel->getUnreadCount((int) $user['id']);
+        $pendingInvitations = $this->projectModel->fetchPendingInvitations((int) $user['id']);
+        $pendingInvitationCount = $this->projectModel->getPendingInvitationCount((int) $user['id']);
 
         $this->render('app/projects/show', [
             'user' => $user,
             'project' => $project,
             'members' => $members,
             'documents' => $documents,
+            'notifications' => $notifications,
+            'notificationUnreadCount' => $notificationUnreadCount,
+            'pendingInvitations' => $pendingInvitations,
+            'pendingInvitationCount' => $pendingInvitationCount,
         ], (string) $project['title']);
     }
 
@@ -133,7 +141,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $result = $this->documentService->uploadInitialDocument(
+        $result = $this->documentModel->uploadInitialDocument(
             $projectIdInt,
             (int) $user['id'],
             $title,
@@ -163,7 +171,7 @@ final class ProjectController extends Controller
             $reviewThreadIds = [];
         }
 
-        $result = $this->documentService->uploadNewDocumentVersion(
+        $result = $this->documentModel->uploadNewDocumentVersion(
             (int) $projectId,
             (int) $documentId,
             (int) $user['id'],
@@ -193,7 +201,7 @@ final class ProjectController extends Controller
         }
 
         $requestedVersion = isset($_GET['version']) ? (int) $_GET['version'] : null;
-        $payload = $this->documentService->fetchDocumentDetailForUser(
+        $payload = $this->documentModel->fetchDocumentDetailForUser(
             $projectIdInt,
             $documentIdInt,
             (int) $user['id'],
@@ -228,7 +236,7 @@ final class ProjectController extends Controller
         $pageNumber = (int) ($payload['page_number'] ?? 0);
         $versionId = (int) ($payload['version_id'] ?? 0);
 
-        $result = $this->documentService->createReviewThreadForUser(
+        $result = $this->documentModel->createReviewThreadForUser(
             (int) $projectId,
             (int) $documentId,
             (int) $user['id'],
@@ -255,7 +263,7 @@ final class ProjectController extends Controller
         $pageNumber = (int) ($payload['page_number'] ?? 0);
         $versionId = (int) ($payload['version_id'] ?? 0);
 
-        $result = $this->documentService->addReviewCommentForUser(
+        $result = $this->documentModel->addReviewCommentForUser(
             (int) $projectId,
             (int) $documentId,
             (int) $threadId,
@@ -280,7 +288,7 @@ final class ProjectController extends Controller
         $payload = $this->readPayload();
         $versionId = (int) ($payload['version_id'] ?? 0);
 
-        $result = $this->documentService->resolveReviewThreadForUser(
+        $result = $this->documentModel->resolveReviewThreadForUser(
             (int) $projectId,
             (int) $documentId,
             (int) $threadId,
@@ -303,7 +311,7 @@ final class ProjectController extends Controller
         $payload = $this->readPayload();
         $versionId = (int) ($payload['version_id'] ?? 0);
 
-        $result = $this->documentService->approveDocumentVersionForUser(
+        $result = $this->documentModel->approveDocumentVersionForUser(
             (int) $projectId,
             (int) $documentId,
             (int) $user['id'],
@@ -325,7 +333,7 @@ final class ProjectController extends Controller
         }
 
         $versionIdInt = (int) $versionId;
-        $file = $this->documentService->getVersionFileForUser($versionIdInt, (int) $user['id']);
+        $file = $this->documentModel->getVersionFileForUser($versionIdInt, (int) $user['id']);
 
         if ($file === null) {
             http_response_code(404);
@@ -359,7 +367,7 @@ final class ProjectController extends Controller
         $payload = $this->readPayload();
         $role = trim((string) ($payload['role'] ?? ''));
 
-        $result = $this->projectService->changeMemberRole(
+        $result = $this->projectModel->changeMemberRole(
             $projectIdInt,
             (int) $user['id'],
             $memberUserIdInt,
@@ -386,7 +394,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $result = $this->projectService->inviteMembersToProject(
+        $result = $this->projectModel->inviteMembersToProject(
             (int) $projectId,
             (int) $user['id'],
             $members
@@ -404,7 +412,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $result = $this->projectService->removeMemberFromProject(
+        $result = $this->projectModel->removeMemberFromProject(
             (int) $projectId,
             (int) $user['id'],
             (int) $memberUserId
@@ -422,7 +430,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $invitations = $this->projectService->fetchPendingInvitations((int) $user['id']);
+        $invitations = $this->projectModel->fetchPendingInvitations((int) $user['id']);
         $this->json(['ok' => true, 'invitations' => $invitations]);
     }
 
@@ -434,7 +442,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $result = $this->projectService->acceptInvitation((int) $user['id'], (int) $invitationId);
+        $result = $this->projectModel->acceptInvitation((int) $user['id'], (int) $invitationId);
         $statusCode = $result['ok'] ? 200 : 422;
         $this->json($result, $statusCode);
     }
@@ -447,7 +455,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $result = $this->projectService->declineInvitation((int) $user['id'], (int) $invitationId);
+        $result = $this->projectModel->declineInvitation((int) $user['id'], (int) $invitationId);
         $statusCode = $result['ok'] ? 200 : 422;
         $this->json($result, $statusCode);
     }
@@ -460,8 +468,8 @@ final class ProjectController extends Controller
             return;
         }
 
-        $notifications = $this->notificationService->fetchNotifications((int) $user['id']);
-        $unreadCount = $this->notificationService->getUnreadCount((int) $user['id']);
+        $notifications = $this->notificationModel->fetchNotifications((int) $user['id']);
+        $unreadCount = $this->notificationModel->getUnreadCount((int) $user['id']);
 
         $this->json([
             'ok' => true,
@@ -478,7 +486,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $updated = $this->notificationService->markAsRead((int) $notificationId, (int) $user['id']);
+        $updated = $this->notificationModel->markAsRead((int) $notificationId, (int) $user['id']);
         $this->json([
             'ok' => $updated,
             'message' => $updated ? 'Notification marked as read.' : 'Notification not found.',
@@ -493,7 +501,7 @@ final class ProjectController extends Controller
             return;
         }
 
-        $this->notificationService->markAllAsRead((int) $user['id']);
+        $this->notificationModel->markAllAsRead((int) $user['id']);
         $this->json(['ok' => true, 'message' => 'All notifications marked as read.']);
     }
 
